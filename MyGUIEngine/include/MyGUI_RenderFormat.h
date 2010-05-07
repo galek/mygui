@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -87,7 +88,7 @@ namespace MyGUI
 		friend TextureUsage operator | (Enum const& a, Enum const& b) { return TextureUsage(Enum(int(a) | int(b))); }
 		friend TextureUsage operator | (TextureUsage const& a, TextureUsage const& b) { return TextureUsage(Enum(int(a.value) | int(b.value))); }
 
-		bool isValue(Enum _value) const { return 0 != (value & _value); }
+		bool isValue(Enum _value) { return 0 != (value & _value); }
 
 	private:
 		Enum value;

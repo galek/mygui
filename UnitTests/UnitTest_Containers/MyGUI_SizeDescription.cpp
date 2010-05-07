@@ -2,6 +2,7 @@
 	@file
 	@author		Alexander Ptakhin
 	@date		02/2009
+	@module
 */
 #include "MyGUI_SizeDescription.h"
 #include "MyGUI_Window.h"

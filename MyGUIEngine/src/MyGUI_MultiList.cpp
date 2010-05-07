@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -53,12 +54,10 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void MultiList::_shutdown()
+	MultiList::~MultiList()
 	{
 		frameAdvise(false);
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void MultiList::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -534,13 +533,12 @@ namespace MyGUI
 		if (0 == count) return;
 
 		// shell sort
-		int first;
-		size_t last;
+		int first, last;
 		for (size_t step = count>>1; step>0 ; step >>= 1)
 		{
 			for (size_t i=0;i<(count-step);i++)
 			{
-				first=(int)i;
+				first=i;
 				while (first>=0)
 				{
 					last = first+step;

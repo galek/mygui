@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -27,6 +28,7 @@
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_InputManager.h"
 #include "MyGUI_Gui.h"
+#include "MyGUI_WidgetTranslate.h"
 #include "MyGUI_WidgetManager.h"
 
 namespace MyGUI
@@ -51,11 +53,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void ListCtrl::_shutdown()
+	ListCtrl::~ListCtrl()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	size_t ListCtrl::getHScrollPage()
@@ -78,8 +78,7 @@ namespace MyGUI
 	void ListCtrl::initialiseWidgetSkin(ResourceSkin* _info)
 	{
 		// нам нужен фокус клавы
-		//FIXME
-		setNeedKeyFocus(true);
+		mNeedKeyFocus = true;
 		mDragLayer = "DragAndDrop";
 
 		const MapString& properties = _info->getProperties();
@@ -113,8 +112,11 @@ namespace MyGUI
 				mClient = mWidgetClient;
 			}
 		}
+		// сли нет скрола, то клиенская зона не обязательно
+		//MYGUI_ASSERT(nullptr != mWidgetClient, "Child Widget Client not found in skin (ListCtrl must have Client) skin ='" << _info->getSkinName() << "'");
 
-		_getClientWidget()->_setContainer(this);
+		// подписываем клиент для драгэндропа
+		_getClientWidget()->_requestGetContainer = newDelegate(this, &ListCtrl::_requestGetContainer);
 
 		updateFromResize();
 	}
@@ -235,23 +237,15 @@ namespace MyGUI
 			// вызываем запрос на создание виджета
 			requestCreateWidgetItem(this, item);
 
-			// и дроп и нотифай и обработка
-			item->eventMouseButtonPressed = newDelegate(this, &ListCtrl::notifyMouseButtonPressed);
-
-			// дроп и нотифай
-			item->eventMouseButtonReleased = newDelegate(this, &ListCtrl::notifyMouseButtonReleased);
-
-			// обрабатываемые события
-			item->eventMouseButtonDoubleClick = newDelegate(this, &ListCtrl::notifyMouseButtonDoubleClick);
 			item->eventMouseWheel = newDelegate(this, &ListCtrl::notifyMouseWheel);
-
-			// это для нотифая
+			item->eventRootMouseChangeFocus = newDelegate(this, &ListCtrl::notifyRootMouseChangeFocus);
+			item->eventMouseButtonPressed = newDelegate(this, &ListCtrl::notifyMouseButtonPressed);
+			item->eventMouseButtonReleased = newDelegate(this, &ListCtrl::notifyMouseButtonReleased);
+			item->eventMouseButtonDoubleClick = newDelegate(this, &ListCtrl::notifyMouseButtonDoubleClick);
+			item->eventMouseDrag = newDelegate(this, &ListCtrl::notifyMouseDrag);
+			item->_requestGetContainer = newDelegate(this, &ListCtrl::_requestGetContainer);
 			item->eventKeyButtonPressed = newDelegate(this, &ListCtrl::notifyKeyButtonPressed);
 			item->eventKeyButtonReleased = newDelegate(this, &ListCtrl::notifyKeyButtonReleased);
-
-			// это для дропа
-			item->eventMouseDrag = newDelegate(this, &ListCtrl::notifyMouseDrag);
-			item->_setContainer(this);
 
 			mVectorItems.push_back(item);
 		}
@@ -353,14 +347,22 @@ namespace MyGUI
 		}
 	}
 
-	size_t ListCtrl::_getItemIndex(Widget* _item)
+	void ListCtrl::_requestGetContainer(Widget* _sender, Widget*& _container, size_t& _index)
 	{
-		if (_item == _getClientWidget())
-			return ITEM_NONE;
-		size_t index = calcIndexByWidget(_item);
-		if (index < mItemsInfo.size())
-			return index;
-		return ITEM_NONE;
+		if (_sender == _getClientWidget())
+		{
+			_container = this;
+			_index = ITEM_NONE;
+		}
+		else
+		{
+			size_t index = calcIndexByWidget(_sender);
+			if (index < mItemsInfo.size())
+			{
+				_container = this;
+				_index = index;
+			}
+		}
 	}
 
 	void ListCtrl::_setContainerItemInfo(size_t _index, bool _set, bool _accept)
@@ -573,12 +575,27 @@ namespace MyGUI
 		return index;
 	}
 
+	size_t ListCtrl::_getContainerIndex(const IntPoint& _point)
+	{
+		for (VectorWidgetPtr::iterator iter=mVectorItems.begin(); iter!=mVectorItems.end(); ++iter)
+		{
+			if ((*iter)->isVisible())
+			{
+				if ((*iter)->getAbsoluteRect().inside(_point))
+				{
+					return getIndexByWidget(*iter);
+				}
+			}
+		}
+		return ITEM_NONE;
+	}
+
 	void ListCtrl::_resetContainer(bool _update)
 	{
 		// обязательно у базового
 		Base::_resetContainer(_update);
 
-		if (!_update)
+		if ( ! _update)
 		{
 			WidgetManager& instance = WidgetManager::getInstance();
 			for (VectorWidgetPtr::iterator iter=mVectorItems.begin(); iter!=mVectorItems.end(); ++iter)
@@ -708,6 +725,60 @@ namespace MyGUI
 		eventNotifyItem(this, IBNotifyItemData(getIndexByWidget(_sender), IBNotifyItemData::MouseReleased, _left, _top, _id));
 	}
 
+	void ListCtrl::notifyRootMouseChangeFocus(Widget* _sender, bool _focus)
+	{
+		size_t index = calcIndexByWidget(_sender);
+		if (_focus)
+		{
+			MYGUI_ASSERT_RANGE(index, mItemsInfo.size(), "ListCtrl::notifyRootMouseChangeFocus");
+
+			// сбрасываем старый
+			if (mIndexActive != ITEM_NONE)
+			{
+				size_t old_index = mIndexActive;
+				mIndexActive = ITEM_NONE;
+
+				//FIXME потом только один попробовать обновить
+				_updateAllVisible(old_index, true, false);
+
+				/*IBDrawItemInfo data(old_index, mIndexSelect, mIndexActive, mIndexAccept, mIndexRefuse, false, false);
+				IntCoord coord(IntPoint(), mItemsInfo[old_index].size);
+				requestDrawItem(this, mVectorItems[old_index - mFirstVisibleIndex], data, coord);
+				mItemsInfo[old_index].size = coord.size();*/
+
+			}
+
+			mIndexActive = index;
+
+			//FIXME потом только один попробовать обновить
+			_updateAllVisible(index, true, false);
+
+			/*IBDrawItemInfo data(index, mIndexSelect, mIndexActive, mIndexAccept, mIndexRefuse, false, false);
+			IntCoord coord(IntPoint(), mItemsInfo[index].size);
+			requestDrawItem(this, mVectorItems[*_sender->_getInternalData<size_t>()], data, coord);
+			mItemsInfo[index].size = coord.size();*/
+
+		}
+		else
+		{
+			// при сбросе виджет может быть уже скрыт, и соответсвенно отсутсвовать индекс
+			// сбрасываем индекс, только если мы и есть актив
+			if (index < mItemsInfo.size() && mIndexActive == index)
+			{
+				mIndexActive = ITEM_NONE;
+
+				//FIXME потом только один попробовать обновить
+				_updateAllVisible(index, true, false);
+
+				/*IBDrawItemInfo data(index, mIndexSelect, mIndexActive, mIndexAccept, mIndexRefuse, false, false);
+				IntCoord coord(IntPoint(), mItemsInfo[index].size);
+				requestDrawItem(this, mVectorItems[*_sender->_getInternalData<size_t>()], data, coord);
+				mItemsInfo[index].size = coord.size();*/
+
+			}
+		}
+	}
+
 	void ListCtrl::updateMetrics()
 	{
 		IntSize size;
@@ -749,8 +820,8 @@ namespace MyGUI
 		if (mContentSize.height <= 0) return;
 
 		int offset = mContentPosition.top;
-		if (_rel < 0) offset += (int)mScrollViewPage;
-		else offset -= (int)mScrollViewPage;
+		if (_rel < 0) offset += mScrollViewPage;
+		else offset -= mScrollViewPage;
 
 		if (mContentSize.height <= _getClientWidget()->getHeight()) return;
 
@@ -814,75 +885,6 @@ namespace MyGUI
 	const Widget* ListCtrl::_getClientWidget() const
 	{
 		return mWidgetClient == nullptr ? this : mWidgetClient;
-	}
-
-	void ListCtrl::onEventMouseRootFocusChanged(Widget* _sender, EventInfo* _info, FocusChangedEventArgs* _args)
-	{
-		if (isOurItemWidget(_info->getSource()))
-		{
-			size_t index = calcIndexByWidget(_info->getSource());
-			if (_args->getFocus())
-			{
-				MYGUI_ASSERT_RANGE(index, mItemsInfo.size(), "ListCtrl::notifyRootMouseChangeFocus");
-
-				// сбрасываем старый
-				if (mIndexActive != ITEM_NONE)
-				{
-					size_t old_index = mIndexActive;
-					mIndexActive = ITEM_NONE;
-
-					//FIXME потом только один попробовать обновить
-					_updateAllVisible(old_index, true, false);
-
-					/*IBDrawItemInfo data(old_index, mIndexSelect, mIndexActive, mIndexAccept, mIndexRefuse, false, false);
-					IntCoord coord(IntPoint(), mItemsInfo[old_index].size);
-					requestDrawItem(this, mVectorItems[old_index - mFirstVisibleIndex], data, coord);
-					mItemsInfo[old_index].size = coord.size();*/
-
-				}
-
-				mIndexActive = index;
-
-				//FIXME потом только один попробовать обновить
-				_updateAllVisible(index, true, false);
-
-				/*IBDrawItemInfo data(index, mIndexSelect, mIndexActive, mIndexAccept, mIndexRefuse, false, false);
-				IntCoord coord(IntPoint(), mItemsInfo[index].size);
-				requestDrawItem(this, mVectorItems[*_info->getSource()->_getInternalData<size_t>()], data, coord);
-				mItemsInfo[index].size = coord.size();*/
-
-			}
-			else
-			{
-				// при сбросе виджет может быть уже скрыт, и соответсвенно отсутсвовать индекс
-				// сбрасываем индекс, только если мы и есть актив
-				if (index < mItemsInfo.size() && mIndexActive == index)
-				{
-					mIndexActive = ITEM_NONE;
-
-					//FIXME потом только один попробовать обновить
-					_updateAllVisible(index, true, false);
-
-					/*IBDrawItemInfo data(index, mIndexSelect, mIndexActive, mIndexAccept, mIndexRefuse, false, false);
-					IntCoord coord(IntPoint(), mItemsInfo[index].size);
-					requestDrawItem(this, mVectorItems[*_info->getSource()->_getInternalData<size_t>()], data, coord);
-					mItemsInfo[index].size = coord.size();*/
-
-				}
-			}
-		}
-
-		Base::onEventMouseRootFocusChanged(_sender, _info, _args);
-	}
-
-	bool ListCtrl::isOurItemWidget(Widget* _widget)
-	{
-		for (size_t index=0; index<mVectorItems.size(); ++index)
-		{
-			if (mVectorItems[index] == _widget)
-				return true;
-		}
-		return false;
 	}
 
 } // namespace MyGUI

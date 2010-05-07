@@ -20,13 +20,7 @@
 namespace MyGUI
 {
 
-	template <> const char* Singleton<OpenGLRenderManager>::INSTANCE_TYPE_NAME("OpenGLRenderManager");
-
-	OpenGLRenderManager::OpenGLRenderManager() :
-		mUpdate(false),
-		mImageLoader(nullptr)
-	{
-	}
+	MYGUI_INSTANCE_IMPLEMENT(OpenGLRenderManager)
 
 	void OpenGLRenderManager::initialise(OpenGLImageLoader* _loader)
 	{
@@ -79,7 +73,7 @@ namespace MyGUI
 			//MYGUI_PLATFORM_ASSERT(texture_id, "Texture is not created");
 		}
 
-		glBindTexture(GL_TEXTURE_2D, texture_id);
+	    glBindTexture(GL_TEXTURE_2D, texture_id);
 
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, buffer_id);
 
@@ -103,7 +97,7 @@ namespace MyGUI
 		glDisableClientState(GL_VERTEX_ARRAY);
 
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+	    glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void OpenGLRenderManager::begin()
@@ -169,14 +163,14 @@ namespace MyGUI
 
 	void OpenGLRenderManager::drawOneFrame()
 	{
-		Gui* gui = Gui::getInstancePtr();
-		if (gui == nullptr) return;
 		static Timer timer;
 		static unsigned long last_time = timer.getMilliseconds();
 		unsigned long now_time = timer.getMilliseconds();
 		unsigned long time = now_time - last_time;
 
-		gui->_injectFrameEntered((float)((double)(time) / (double)1000));
+		Gui* gui = Gui::getInstancePtr();
+		if (gui != nullptr)
+			gui->_injectFrameEntered((float)((double)(time) / (double)1000));
 
 		last_time = now_time;
 
@@ -206,7 +200,7 @@ namespace MyGUI
 		Gui* gui = Gui::getInstancePtr();
 		if (gui != nullptr)
 		{
-			gui->_resizeWindow(mViewSize);
+			gui->resizeWindow(mViewSize);
 			mUpdate = true;
 		}
 	}

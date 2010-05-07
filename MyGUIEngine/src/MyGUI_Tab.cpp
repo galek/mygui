@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		01/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -22,6 +23,7 @@
 #include "MyGUI_Precompiled.h"
 #include "MyGUI_Tab.h"
 #include "MyGUI_ControllerManager.h"
+#include "MyGUI_WidgetManager.h"
 #include "MyGUI_Button.h"
 #include "MyGUI_TabItem.h"
 #include "MyGUI_ResourceSkin.h"
@@ -58,12 +60,10 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void Tab::_shutdown()
+	Tab::~Tab()
 	{
 		mShutdown = true;
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void Tab::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -296,19 +296,15 @@ namespace MyGUI
 		bool right = true;
 		if (pos == mItemsInfo.size()) right = false;
 
-		// в редакторе падает почему то, хотя этот скин создается всегда
-		if (mEmptyBarWidget)
+		// корректируем виджет для пустоты
+		if (width < _getWidgetBar()->getWidth())
 		{
-			// корректируем виджет для пустоты
-			if (width < _getWidgetBar()->getWidth())
-			{
-				mEmptyBarWidget->setVisible(true);
-				mEmptyBarWidget->setCoord(width, 0, _getWidgetBar()->getWidth() - width, _getWidgetBar()->getHeight());
-			}
-			else
-			{
-				mEmptyBarWidget->setVisible(false);
-			}
+			mEmptyBarWidget->setVisible(true);
+			mEmptyBarWidget->setCoord(width, 0, _getWidgetBar()->getWidth() - width, _getWidgetBar()->getHeight());
+		}
+		else
+		{
+			mEmptyBarWidget->setVisible(false);
 		}
 
 		// корректируем доступность стрелок

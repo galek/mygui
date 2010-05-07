@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 #include "precompiled.h"
 #include "DemoKeeper.h"
@@ -23,7 +24,10 @@ namespace demo
 
 	void DemoKeeper::createScene()
 	{
-		MyGUI::ResourceManager::getInstance().load("Wallpaper0.layout");
+        getGUI()->load("Wallpaper0.layout");
+
+		const MyGUI::IntSize & view = MyGUI::Gui::getInstance().getViewSize();
+		const MyGUI::IntSize size(100, 100);
 
 		unittest_list = new unittest::UnitTest_List();
 		unittest_multilist = new unittest::UnitTest_MultiList();

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2008
+	@module
 */
 
 #include "MyGUI_OgreDataManager.h"
@@ -17,16 +18,7 @@
 namespace MyGUI
 {
 
-	template <> const char* Singleton<OgreRenderManager>::INSTANCE_TYPE_NAME("OgreRenderManager");
-
-	OgreRenderManager::OgreRenderManager() :
-		mUpdate(false),
-		mSceneManager(nullptr),
-		mWindow(nullptr),
-		mActiveViewport(0),
-		mRenderSystem(nullptr)
-	{
-	}
+	MYGUI_INSTANCE_IMPLEMENT(OgreRenderManager)
 
 	void OgreRenderManager::initialise(Ogre::RenderWindow* _window, Ogre::SceneManager* _scene)
 	{
@@ -137,7 +129,7 @@ namespace MyGUI
 		}
 	}
 
-	void OgreRenderManager::setActiveViewport(unsigned short _num)
+	void OgreRenderManager::setActiveViewport(size_t _num)
 	{
 		mActiveViewport = _num;
 
@@ -153,8 +145,6 @@ namespace MyGUI
 
 	void OgreRenderManager::renderQueueStarted(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation)
 	{
-		Gui* gui = Gui::getInstancePtr();
-		if (gui == nullptr) return;
 		if (Ogre::RENDER_QUEUE_OVERLAY != queueGroupId) return;
 
 		Ogre::Viewport * viewport = mSceneManager->getCurrentViewport();
@@ -171,7 +161,9 @@ namespace MyGUI
 		unsigned long now_time = timer.getMilliseconds();
 		unsigned long time = now_time - last_time;
 
-		gui->_injectFrameEntered((float)((double)(time) / (double)1000));
+		Gui* gui = Gui::getInstancePtr();
+		if (gui != nullptr)
+			gui->_injectFrameEntered((float)((double)(time) / (double)1000));
 
 		last_time = now_time;
 
@@ -215,15 +207,7 @@ namespace MyGUI
 		if (_window->getNumViewports() > mActiveViewport)
 		{
 			Ogre::Viewport* port = _window->getViewport(mActiveViewport);
-#if OGRE_VERSION >= MYGUI_DEFINE_VERSION(1, 7, 0) && OGRE_NO_VIEWPORT_ORIENTATIONMODE == 0
-			Ogre::OrientationMode orient = port->getOrientationMode();
-			if (orient == Ogre::OR_DEGREE_90 || orient == Ogre::OR_DEGREE_270)
-				mViewSize.set(port->getActualHeight(), port->getActualWidth());
-			else
-				mViewSize.set(port->getActualWidth(), port->getActualHeight());
-#else
 			mViewSize.set(port->getActualWidth(), port->getActualHeight());
-#endif
 
 			// обновить всех
 			mUpdate = true;
@@ -232,7 +216,7 @@ namespace MyGUI
 
 			Gui* gui = Gui::getInstancePtr();
 			if (gui != nullptr)
-				gui->_resizeWindow(mViewSize);
+				gui->resizeWindow(mViewSize);
 		}
 	}
 
@@ -244,8 +228,8 @@ namespace MyGUI
 			mInfo.hOffset = mRenderSystem->getHorizontalTexelOffset() / float(mViewSize.width);
 			mInfo.vOffset = mRenderSystem->getVerticalTexelOffset() / float(mViewSize.height);
 			mInfo.aspectCoef = float(mViewSize.height) / float(mViewSize.width);
-			mInfo.pixScaleX = 1.0f / float(mViewSize.width);
-			mInfo.pixScaleY = 1.0f / float(mViewSize.height);
+			mInfo.pixScaleX = 1.0 / float(mViewSize.width);
+			mInfo.pixScaleY = 1.0 / float(mViewSize.height);
 		}
 	}
 
@@ -276,12 +260,7 @@ namespace MyGUI
 		// set-up matrices
 		mRenderSystem->_setWorldMatrix(Ogre::Matrix4::IDENTITY);
 		mRenderSystem->_setViewMatrix(Ogre::Matrix4::IDENTITY);
-#if OGRE_VERSION >= MYGUI_DEFINE_VERSION(1, 7, 0) && OGRE_NO_VIEWPORT_ORIENTATIONMODE == 0
-		Ogre::OrientationMode orient = mWindow->getViewport(mActiveViewport)->getOrientationMode();
-		mRenderSystem->_setProjectionMatrix(Ogre::Matrix4::IDENTITY * Ogre::Quaternion(Ogre::Degree(orient * 90.f), Ogre::Vector3::UNIT_Z));
-#else
 		mRenderSystem->_setProjectionMatrix(Ogre::Matrix4::IDENTITY);
-#endif
 
 		// initialise render settings
 		mRenderSystem->setLightingEnabled(false);
@@ -322,7 +301,7 @@ namespace MyGUI
 		MapTexture::const_iterator item = mTextures.find(_name);
 		MYGUI_PLATFORM_ASSERT(item == mTextures.end(), "Texture '" << _name << "' already exist");
 
-		OgreTexture* texture = new OgreTexture(_name, OgreDataManager::getInstancePtr()->getGroup());
+		OgreTexture* texture = new OgreTexture(_name, OgreDataManager::getInstance().getGroup());
 		mTextures[_name] = texture;
 		return texture;
 	}

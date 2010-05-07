@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		08/2008
+	@module
 */
 #include "precompiled.h"
 #include "DemoKeeper.h"
@@ -28,11 +29,13 @@ namespace demo
 
 	void DemoKeeper::createScene()
 	{
-		MyGUI::ResourceManager::getInstance().load("Wallpaper0.layout");
-		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().loadLayout("BackHelp.layout");
+		getGUI()->load("Wallpaper0.layout");
+		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().load("BackHelp.layout");
 		root.at(0)->findWidget("Text")->setCaption("ControllerFadeAlpha and ControllerPosition examples.");
 
 		mIsAnim = false;
+
+		const MyGUI::IntSize size(128, 128);
 
 		mMenu1 = new State("Menu1.layout", ControllerType::Inertional);
 		mMenu1->eventButtonPress = MyGUI::newDelegate(this, &DemoKeeper::notifyButtonPress);

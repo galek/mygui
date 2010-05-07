@@ -3,19 +3,29 @@
 
 const int UNDO_COUNT = 64;
 
-template <> const char* MyGUI::Singleton<UndoManager>::INSTANCE_TYPE_NAME("UndoManager");
-
+const std::string INSTANCE_TYPE_NAME("UndoManager");
+UndoManager* UndoManager::msInstance = 0;
+UndoManager* UndoManager::getInstancePtr()
+{
+	return msInstance;
+}
+UndoManager& UndoManager::getInstance()
+{
+	MYGUI_ASSERT(0 != msInstance, "instance " << INSTANCE_TYPE_NAME << " was not created");
+	return (*msInstance);
+}
 UndoManager::UndoManager() :
+	mIsInitialise(false),
 	pos(0),
 	operations(UNDO_COUNT),
 	last_property(0),
 	ew(nullptr),
 	mUnsaved(false)
 {
+	MYGUI_ASSERT(0 == msInstance, "instance " << INSTANCE_TYPE_NAME << " is exsist");
+	msInstance=this;
 }
-UndoManager::~UndoManager()
-{
-}
+UndoManager::~UndoManager() { msInstance=0; }
 
 void UndoManager::initialise(EditorWidgets * _ew)
 {

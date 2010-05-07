@@ -2,6 +2,7 @@
     @file
     @author     Albert Semenov
     @date       08/2008
+    @module
 */
 #include "precompiled.h"
 #include "Controller.h"
@@ -23,7 +24,7 @@ namespace editor
 
 	void Controller::createScene()
 	{
-		MyGUI::ResourceManager::getInstance().load("Wallpaper0.layout");
+		getGUI()->load("Wallpaper0.layout");
 		MyGUI::ResourceManager::getInstance().load("external_resources.xml");
 
 		mView = new View();

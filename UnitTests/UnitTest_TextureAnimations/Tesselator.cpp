@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		06/2008
+	@module
 */
 
 #include "Tesselator.h"
@@ -58,9 +59,7 @@ namespace demo
 				//if (_info.rttFlipY) v = 1 - v;
 
 				MyGUI::Vertex vertex;
-				MyGUI::ColourARGB colour;
-				colour.value = MyGUI::ColourARGB::White;
-				vertex.set(fx, fy, vertex_z, u, v, colour);
+				vertex.set(fx, fy, vertex_z, u, v, 0xFFFFFFFF);
 
 				if (rx < mCountX && ry < mCountY)
 				{

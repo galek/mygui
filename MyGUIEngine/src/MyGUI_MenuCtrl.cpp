@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		02/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -26,6 +27,7 @@
 #include "MyGUI_StaticImage.h"
 #include "MyGUI_MenuBar.h"
 #include "MyGUI_WidgetManager.h"
+#include "MyGUI_LayerManager.h"
 #include "MyGUI_ControllerManager.h"
 #include "MyGUI_InputManager.h"
 #include "MyGUI_Gui.h"
@@ -75,12 +77,10 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void MenuCtrl::_shutdown()
+	MenuCtrl::~MenuCtrl()
 	{
 		mShutdown = true;
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void MenuCtrl::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -93,8 +93,7 @@ namespace MyGUI
 	void MenuCtrl::initialiseWidgetSkin(ResourceSkin* _info)
 	{
 		// нам нужен фокус клавы
-		//FIXME
-		setNeedKeyFocus(true);
+		mNeedKeyFocus = true;
 
 		for (VectorWidgetPtr::iterator iter=mWidgetChildSkin.begin(); iter!=mWidgetChildSkin.end(); ++iter)
 		{
@@ -345,16 +344,16 @@ namespace MyGUI
 
 	void MenuCtrl::notifyMenuCtrlAccept(MenuItem* _item)
 	{
-		//Widget* sender = this;
+		Widget* sender = this;
 
-		//WidgetManager::getInstance().addWidgetToUnlink(sender);
+		WidgetManager::getInstance().addWidgetToUnlink(sender);
 		eventMenuCtrlAccept(this, _item);
-		//WidgetManager::getInstance().removeWidgetFromUnlink(sender);
+		WidgetManager::getInstance().removeWidgetFromUnlink(sender);
 
 		// нас удалили
-		//if (sender == nullptr) return;
+		if (sender == nullptr) return;
 
-		//WidgetManager::getInstance().addWidgetToUnlink(sender);
+		WidgetManager::getInstance().addWidgetToUnlink(sender);
 
 		MenuItem* parent_item = getMenuItemParent();
 		if (parent_item)
@@ -366,10 +365,10 @@ namespace MyGUI
 			}
 		}
 
-		//WidgetManager::getInstance().removeWidgetFromUnlink(sender);
+		WidgetManager::getInstance().removeWidgetFromUnlink(sender);
 
 		// нас удалили
-		//if (sender == nullptr) return;
+		if (sender == nullptr) return;
 
 
 		if (mHideByAccept)
@@ -391,23 +390,23 @@ namespace MyGUI
 			if (mItemsInfo[_index].submenu && mItemsInfo[_index].submenu->getItemCount())
 			{
 
-				int offset = mItemsInfo[0].item->getAbsoluteTop() - getAbsoluteTop();
+				int offset = mItemsInfo[0].item->getAbsoluteTop() - this->getAbsoluteTop();
 
 				const IntCoord& coord = mItemsInfo[_index].item->getAbsoluteCoord();
-				IntPoint point(getAbsoluteRect().right, coord.top - offset);
+				IntPoint point(this->getAbsoluteRect().right, coord.top - offset);
 
 				MenuCtrl* menu = mItemsInfo[_index].submenu;
 
-				if (mAlignVert)
+				if (this->mAlignVert)
 				{
-					if (point.left + menu->getWidth() > menu->getParentSize().width)
+					if (point.left + menu->getWidth() > MyGUI::Gui::getInstance().getViewSize().width)
 						point.left -= menu->getWidth();
-					if (point.top + menu->getHeight() > menu->getParentSize().height)
+					if (point.top + menu->getHeight() > MyGUI::Gui::getInstance().getViewSize().height)
 						point.top -= menu->getHeight();
 				}
 				else
 				{
-					point.set(coord.left, getAbsoluteRect().bottom);
+					point.set(coord.left, this->getAbsoluteRect().bottom);
 				}
 
 				menu->setPosition(point);
@@ -423,28 +422,23 @@ namespace MyGUI
 		}
 	}
 
-	void MenuCtrl::notifyEventKeyboardRootFocusChanged(Widget* _sender, EventInfo* _info, FocusChangedEventArgs* _args)
+	void MenuCtrl::notifyRootKeyChangeFocus(Widget* _sender, bool _focus)
 	{
-		if (isOurItemWidget(_info->getSource()))
+		MenuItem* item = _sender->castType<MenuItem>();
+		if (item->getItemType() == MenuItemType::Popup)
 		{
-			_info->setHandled(true);
-
-			MenuItem* item = _info->getSource()->castType<MenuItem>();
-			if (item->getItemType() == MenuItemType::Popup)
+			if (_focus)
 			{
-				if (_args->getFocus())
+				if (!mMenuDropMode || mIsMenuDrop)
 				{
-					if (!mMenuDropMode || mIsMenuDrop)
-					{
-						item->setItemChildVisible(true);
-						item->setButtonPressed(true);
-					}
+					item->setItemChildVisible(true);
+					item->setButtonPressed(true);
 				}
-				else
-				{
-					item->setItemChildVisible(false);
-					item->setButtonPressed(false);
-				}
+			}
+			else
+			{
+				item->setItemChildVisible(false);
+				item->setButtonPressed(false);
 			}
 		}
 	}
@@ -494,24 +488,18 @@ namespace MyGUI
 
 	}
 
-	void MenuCtrl::onEventKeyboardRootFocusChanged(Widget* _sender, EventInfo* _info, FocusChangedEventArgs* _args)
+	void MenuCtrl::onKeyChangeRootFocus(bool _focus)
 	{
-		if (_info->getSource() == this)
+		if (mMenuDropMode)
 		{
-			_info->setHandled(true);
-
-			if (mMenuDropMode)
-			{
-				mIsMenuDrop = false;
-			}
-			if (!_args->getFocus() && mHideByLostKey)
-			{
-				setVisibleSmooth(false);
-				eventMenuCtrlClose(this);
-			}
+			mIsMenuDrop = false;
 		}
-
-		Base::onEventKeyboardRootFocusChanged(_sender, _info, _args);
+		if ( ! _focus && mHideByLostKey)
+		{
+			setVisibleSmooth(false);
+			eventMenuCtrlClose(this);
+		}
+		Base::onKeyChangeRootFocus(_focus);
 	}
 
 	void MenuCtrl::notifyMouseSetFocus(Widget* _sender, Widget* _new)
@@ -538,7 +526,7 @@ namespace MyGUI
 	{
 		_item->setAlign(mAlignVert ? Align::Top | Align::HStretch : Align::Default);
 		_item->setCoord(0, 0, _getClientWidget()->getWidth(), mHeightLine);
-		_item->EventKeyboardRootFocusChanged += newDelegate(this, &MenuCtrl::notifyEventKeyboardRootFocusChanged);
+		_item->eventRootKeyChangeFocus = newDelegate(this, &MenuCtrl::notifyRootKeyChangeFocus);
 		_item->eventMouseButtonClick = newDelegate(this, &MenuCtrl::notifyMouseButtonClick);
 		_item->eventMouseSetFocus = newDelegate(this, &MenuCtrl::notifyMouseSetFocus);
 
@@ -701,16 +689,6 @@ namespace MyGUI
 	const Widget* MenuCtrl::_getClientWidget() const
 	{
 		return mWidgetClient == nullptr ? this : mWidgetClient;
-	}
-
-	bool MenuCtrl::isOurItemWidget(Widget* _widget)
-	{
-		for (VectorMenuItemInfo::iterator iter=mItemsInfo.begin(); iter!=mItemsInfo.end(); ++iter)
-		{
-			if (iter->item == _widget)
-				return true;
-		}
-		return false;
 	}
 
 } // namespace MyGUI

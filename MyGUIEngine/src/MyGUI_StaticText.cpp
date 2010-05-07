@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -36,11 +37,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void StaticText::_shutdown()
+	StaticText::~StaticText()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void StaticText::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -136,20 +135,6 @@ namespace MyGUI
 			return;
 		}
 		eventChangeProperty(this, _key, _value);
-	}
-
-	IntSize StaticText::overrideMeasure(const IntSize& _sizeAvailable)
-	{
-		if (mText == nullptr)
-			return Base::overrideMeasure(_sizeAvailable);
-
-		return mText->getTextSize() + (getSize() - mText->getSize());
-	}
-
-	void StaticText::setCaption(const UString& _value)
-	{
-		Base::setCaption(_value);
-		invalidateMeasure();
 	}
 
 } // namespace MyGUI

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -40,11 +41,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void ListBox::_shutdown()
+	ListBox::~ListBox()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void ListBox::baseChangeWidgetSkin(ResourceSkin* _info)

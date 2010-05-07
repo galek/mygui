@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		02/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -24,7 +25,6 @@
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_Types.h"
-#include "MyGUI_ColourARGB.h"
 #include "MyGUI_XmlDocument.h"
 #include "MyGUI_ISubWidgetRect.h"
 #include "MyGUI_ResourceSkin.h"
@@ -44,7 +44,7 @@ namespace MyGUI
 		SubSkin();
 		virtual ~SubSkin();
 
-		virtual void setAlpha(float _alpha);
+		void setAlpha(float _alpha);
 
 		virtual void setVisible(bool _visible);
 
@@ -61,6 +61,7 @@ namespace MyGUI
 		void _correctView();
 
 		void _setAlign(const IntSize& _oldsize, bool _update);
+		void _setAlign(const IntCoord& _oldcoord, bool _update);
 
 		virtual void _setUVSet(const FloatRect& _rect);
 		virtual void _setColour(const Colour& _value);
@@ -69,8 +70,7 @@ namespace MyGUI
 		FloatRect mRectTexture;
 		bool mEmptyView;
 
-		VertexColourType mVertexFormat;
-		ColourARGB mCurrentColour;
+		uint32 mCurrentColour;
 
 		FloatRect mCurrentTexture;
 		IntCoord mCurrentCoord;

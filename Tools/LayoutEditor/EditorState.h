@@ -14,7 +14,6 @@ class WidgetTypes;
 class UndoManager;
 struct WidgetContainer;
 class GroupMessage;
-class CodeGenerator;
 
 class EditorState : public base::BaseManager
 {
@@ -24,19 +23,18 @@ public:
 		x(0),
 		y(0),
 		selectDepth(0),
-		recreate(false),
-		mModeSaveDialog(false),
-		testMode(false),
-		mToolTip(nullptr),
-		mPropertiesPanelView(nullptr),
-		mSettingsWindow(nullptr),
-		mWidgetsWindow(nullptr),
-		mMetaSolutionWindow(nullptr),
-		mCodeGenerator(nullptr),
-		ew(nullptr),
-		wt(nullptr),
-		um(nullptr),
-		mGroupMessage(nullptr)
+		recreate(0),
+		mModeSaveDialog(0),
+		testMode(0),
+		mToolTip(0),
+		mPropertiesPanelView(0),
+		mSettingsWindow(0),
+		mWidgetsWindow(0),
+		mMetaSolutionWindow(0),
+		ew(0),
+		wt(0),
+		um(0),
+		mGroupMessage(0)
 	{ }
 	virtual ~EditorState() { }
 
@@ -49,10 +47,6 @@ public:
 	virtual void injectMouseRelease(int _absx, int _absy, MyGUI::MouseButton _id);
 	virtual void injectKeyPress(MyGUI::KeyCode _key, MyGUI::Char _text);
 	virtual void injectKeyRelease(MyGUI::KeyCode _key);
-
-	virtual void prepare(int argc, char **argv);
-	virtual void onFileDrop(const std::string& _filename);
-	virtual bool onWinodwClose(size_t _handle);
 
 //===================================================================================
 
@@ -142,7 +136,6 @@ private:
 	SettingsWindow * mSettingsWindow;
 	WidgetsWindow * mWidgetsWindow;
 	MetaSolutionWindow * mMetaSolutionWindow;
-	CodeGenerator * mCodeGenerator;
 	common::OpenSaveFileDialog* mOpenSaveFileDialog;
 
 
@@ -155,8 +148,5 @@ private:
 	MyGUI::MenuCtrl* mPopupMenuFile;
 	MyGUI::MenuCtrl* mPopupMenuWidgets;
 	std::vector<MyGUI::PopupMenu::ItemInfo> widgetMenus;
-
-	std::vector<std::string> mParams;
-	std::string mLocale;
 };
 #endif // __EDITOR_STATE_H__

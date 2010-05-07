@@ -3,6 +3,7 @@
 	@author		Denis Koronchik
 	@author		Georgiy Evmenov
 	@date		09/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -94,7 +95,7 @@ namespace MyGUI
 
 	protected:
 		//! Gets the last loading error
-		std::string dynlibError() const;
+		std::string dynlibError(void);
 
 
 	protected:

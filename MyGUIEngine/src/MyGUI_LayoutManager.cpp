@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -27,23 +28,13 @@
 #include "MyGUI_Widget.h"
 #include "MyGUI_CoordConverter.h"
 #include "MyGUI_ControllerManager.h"
-#include "MyGUI_RenderManager.h"
 
 namespace MyGUI
 {
 
 	const std::string XML_TYPE("Layout");
 
-	template <> const char* Singleton<LayoutManager>::INSTANCE_TYPE_NAME("LayoutManager");
-
-	LayoutManager::LayoutManager() :
-		layoutParent(nullptr)
-	{
-	}
-
-	LayoutManager::~LayoutManager()
-	{
-	}
+	MYGUI_INSTANCE_IMPLEMENT( LayoutManager )
 
 	void LayoutManager::initialise()
 	{
@@ -69,6 +60,13 @@ namespace MyGUI
 		mIsInitialise = false;
 	}
 
+	VectorWidgetPtr& LayoutManager::load(const std::string& _file)
+	{
+		mVectorWidgetPtr.clear();
+		ResourceManager::getInstance()._loadImplement(_file, true, XML_TYPE, INSTANCE_TYPE_NAME);
+		return mVectorWidgetPtr;
+	}
+
 	void LayoutManager::_load(xml::ElementPtr _node, const std::string& _file, Version _version)
 	{
 #if MYGUI_DEBUG_MODE == 1
@@ -84,11 +82,7 @@ namespace MyGUI
 
 		layoutPrefix = _prefix;
 		layoutParent = _parent;
-
-		mVectorWidgetPtr.clear();
-		ResourceManager::getInstance().load(_file);
-		widgets = mVectorWidgetPtr;
-
+		widgets = load(_file);
 		layoutPrefix = "";
 		layoutParent = nullptr;
 		return widgets;
@@ -130,7 +124,7 @@ namespace MyGUI
 		else if (_widget->findAttribute("position_real", tmp))
 		{
 			if (_parent == nullptr || style == WidgetStyle::Popup)
-				coord = CoordConverter::convertFromRelative(FloatCoord::parse(tmp), RenderManager::getInstance().getViewSize());
+				coord = CoordConverter::convertFromRelative(FloatCoord::parse(tmp), Gui::getInstance().getViewSize());
 			else
 				coord = CoordConverter::convertFromRelative(FloatCoord::parse(tmp), _parent->getSize());
 		}

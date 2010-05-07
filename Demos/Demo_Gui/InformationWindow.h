@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 #ifndef __INFORMATION_WINDOW_H__
 #define __INFORMATION_WINDOW_H__

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -62,19 +63,15 @@ namespace MyGUI
 		/** Get widget text colour */
 		const Colour& getTextColour();
 
-		/** @copydoc Widget::setCaption(const UString& _value) */
-		virtual void setCaption(const UString& _value);
-
 		/** @copydoc Widget::setProperty(const std::string& _key, const std::string& _value) */
 		virtual void setProperty(const std::string& _key, const std::string& _value);
 
 	/*internal:*/
 		virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-		virtual void _shutdown();
-
-		virtual IntSize overrideMeasure(const IntSize& _sizeAvailable);
 
 	protected:
+		virtual ~StaticText();
+
 		void baseChangeWidgetSkin(ResourceSkin* _info);
 
 	private:

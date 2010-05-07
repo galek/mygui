@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -34,14 +35,14 @@ namespace MyGUI
 	const std::string XML_TYPE("Resource");
 	const std::string XML_TYPE_LIST("List");
 
-	template <> const char* Singleton<ResourceManager>::INSTANCE_TYPE_NAME("ResourceManager");
+	MYGUI_INSTANCE_IMPLEMENT( ResourceManager )
 
 	void ResourceManager::initialise()
 	{
 		MYGUI_ASSERT(!mIsInitialise, INSTANCE_TYPE_NAME << " initialised twice");
 		MYGUI_LOG(Info, "* Initialise: " << INSTANCE_TYPE_NAME);
 
-		registerLoadXmlDelegate(XML_TYPE) = newDelegate(this, &ResourceManager::loadFromXmlNode);
+		registerLoadXmlDelegate(XML_TYPE) = newDelegate(this, &ResourceManager::_load);
 		registerLoadXmlDelegate(XML_TYPE_LIST) = newDelegate(this, &ResourceManager::_loadList);
 
 		// регестрируем дефолтные ресурсы
@@ -73,11 +74,11 @@ namespace MyGUI
 		return _loadImplement(_file, false, "", INSTANCE_TYPE_NAME);
 	}
 
-	void ResourceManager::loadFromXmlNode(xml::ElementPtr _node, const std::string& _file, Version _version)
+	void ResourceManager::_load(xml::ElementPtr _node, const std::string& _file, Version _version)
 	{
 		FactoryManager& factory = FactoryManager::getInstance();
 
-		//VectorGuid vector_guid;
+		VectorGuid vector_guid;
 		// берем детей и крутимся, основной цикл
 		xml::ElementEnumerator root = _node->getElementEnumerator();
 		while (root.next(XML_TYPE))
@@ -88,10 +89,21 @@ namespace MyGUI
 			root->findAttribute("name", name);
 			root->findAttribute("id", id);
 
+			Guid guid(id);
+			if (!guid.empty())
+			{
+				if (mResourcesID.find(guid) != mResourcesID.end())
+				{
+					MYGUI_LOG(Warning, "dublicate resource id " << guid.print());
+				}
+			}
+
 			if (mResources.find(name) != mResources.end())
 			{
 				MYGUI_LOG(Warning, "dublicate resource name '" << name << "'");
 			}
+
+			vector_guid.push_back(guid);
 
 			IObject* object = factory.createObject(XML_TYPE, type);
 			if (object == nullptr)
@@ -103,9 +115,30 @@ namespace MyGUI
 			IResourcePtr resource = object->castType<IResource>();
 			resource->deserialization(root.current(), _version);
 
-			if (!name.empty())
-				mResources[name] = resource;
+			if (!guid.empty()) mResourcesID[guid] = resource;
+			if (!name.empty()) mResources[name] = resource;
 		}
+
+		if (!vector_guid.empty())
+		{
+			mListFileGuid[_file] = vector_guid;
+		}
+
+	}
+
+	std::string ResourceManager::getFileNameByID(const Guid& _id)
+	{
+		for (MapVectorString::iterator item=mListFileGuid.begin(); item!=mListFileGuid.end(); ++item)
+		{
+			for (VectorGuid::iterator item2=item->second.begin(); item2!=item->second.end(); ++item2)
+			{
+				if (*item2 == _id)
+				{
+					return item->first;
+				}
+			}
+		}
+		return "";
 	}
 
 	void ResourceManager::_loadList(xml::ElementPtr _node, const std::string& _file, Version _version)
@@ -213,10 +246,24 @@ namespace MyGUI
 		return true;
 	}
 
+	IResourcePtr ResourceManager::getByID(const Guid& _id, bool _throw)
+	{
+		MapResourceID::iterator iter = mResourcesID.find(_id);
+		if (iter == mResourcesID.end())
+		{
+			if (_throw) MYGUI_EXCEPT("resource '" << _id.print() << "' not found");
+			MYGUI_LOG(Warning, "resource '" << _id.print() << "' not found");
+			return nullptr;
+		}
+		return iter->second;
+	}
+
 	void ResourceManager::addResource(IResourcePtr _item)
 	{
 		if (!_item->getResourceName().empty())
 			mResources[_item->getResourceName()] = _item;
+		if (!_item->getResourceID().empty())
+			mResourcesID[_item->getResourceID()] = _item;
 	}
 
 	void ResourceManager::removeResource(IResourcePtr _item)
@@ -228,6 +275,13 @@ namespace MyGUI
 			MapResource::iterator item = mResources.find(_item->getResourceName());
 			if (item != mResources.end())
 				mResources.erase(item);
+		}
+
+		if (!_item->getResourceID().empty())
+		{
+			MapResourceID::iterator id = mResourcesID.find(_item->getResourceID());
+			if (id != mResourcesID.end())
+				mResourcesID.erase(id);
 		}
 	}
 

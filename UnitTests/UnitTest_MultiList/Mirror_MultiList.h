@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 #ifndef __MIRROR_MULTI_LIST_H__
 #define __MIRROR_MULTI_LIST_H__

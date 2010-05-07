@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		12/2009
+	@module
 */
 #ifndef __PANEL_CONTROLLERS_H__
 #define __PANEL_CONTROLLERS_H__

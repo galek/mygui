@@ -6,7 +6,6 @@
 #include "UndoManager.h"
 #include "Base/Main.h"
 #include "GroupMessage.h"
-#include "CodeGenerator.h"
 
 const std::string LogSection = "LayoutEditor";
 
@@ -39,7 +38,6 @@ void EditorState::setupResources()
 	addResourceLocation(getRootMedia() + "/Tools/LayoutEditor/Panels");
 	addResourceLocation(getRootMedia() + "/Tools/LayoutEditor/Themes");
 	addResourceLocation(getRootMedia() + "/Tools/LayoutEditor/Settings");
-	addResourceLocation(getRootMedia() + "/Tools/LayoutEditor/CodeTemplates");
 	addResourceLocation(getRootMedia() + "/Common/Wallpapers");
 	setResourceFilename("editor.xml");
 }
@@ -50,12 +48,12 @@ void EditorState::createScene()
 
 	MyGUI::LogManager::registerSection(LogSection, "MyGUI.log");
 
+	//FIXME
 	// set locale language if it was taken from OS
-	if (!mLocale.empty())
-		MyGUI::LanguageManager::getInstance().setCurrentLanguage(mLocale);
+	//if (! BasisManager::getInstance().getLanguage().empty() )
+	//	MyGUI::LanguageManager::getInstance().setCurrentLanguage(BasisManager::getInstance().getLanguage());
 	// if you want to test LanguageManager uncomment next line
 	//MyGUI::LanguageManager::getInstance().setCurrentLanguage("Russian");
-
 	testMode = false;
 
 	wt = new WidgetTypes();
@@ -94,10 +92,6 @@ void EditorState::createScene()
 	mMetaSolutionWindow->eventSelectWidget = MyGUI::newDelegate(this, &EditorState::notifySelectWidget);
 	interfaceWidgets.push_back(mMetaSolutionWindow->getMainWidget());
 
-	mCodeGenerator = new CodeGenerator();
-	interfaceWidgets.push_back(mCodeGenerator->getMainWidget());
-	ew->setCodeGenerator(mCodeGenerator);
-
 	mOpenSaveFileDialog = new common::OpenSaveFileDialog();
 	mOpenSaveFileDialog->setVisible(false);
 	mOpenSaveFileDialog->setFileMask("*.layout");
@@ -109,12 +103,11 @@ void EditorState::createScene()
 	// создание меню
 	createMainMenu();
 
-	MyGUI::Widget* widget = mPropertiesPanelView->getMainWidget();
-	widget->setCoord(
-		widget->getParentSize().width - widget->getSize().width,
+	mPropertiesPanelView->getMainWidget()->setCoord(
+		getGUI()->getViewSize().width - mPropertiesPanelView->getMainWidget()->getSize().width,
 		bar->getHeight(),
-		widget->getSize().width,
-		widget->getParentSize().height - bar->getHeight()
+		mPropertiesPanelView->getMainWidget()->getSize().width,
+		getGUI()->getViewHeight() - bar->getHeight()
 		);
 
 	// после загрузки настроек инициализируем
@@ -137,17 +130,21 @@ void EditorState::createScene()
 
 	clear();
 
+	/*MyGUI::Widget* mFpsInfo = mGUI->createWidget<MyGUI::Widget>("ButtonSmall", 20, (int)mGUI->getViewHeight() - 80, 120, 70, MyGUI::Align::Left | MyGUI::Align::Bottom, "Main", "fpsInfo");
+	mFpsInfo->setColour(Ogre::ColourValue::White);*/
+
+	//FIXME
+	/*typedef std::vector<std::string> Params;
+	Params params = BasisManager::getInstance().getCommandParams();
+	for (Params::iterator iter=params.begin(); iter!=params.end(); ++iter)
+	{
+		saveOrLoadLayout(false, false, iter->c_str());
+	}*/
 	getGUI()->eventFrameStart += MyGUI::newDelegate(this, &EditorState::notifyFrameStarted);
 
 	for (std::vector<MyGUI::UString>::iterator iter = additionalPaths.begin(); iter != additionalPaths.end(); ++iter)
 	{
 		addResourceLocation(*iter);
-	}
-
-	// загружаем файлы которые были в командной строке
-	for (std::vector<std::string>::iterator iter=mParams.begin(); iter!=mParams.end(); ++iter)
-	{
-		saveOrLoadLayout(false, false, iter->c_str());
 	}
 }
 
@@ -157,39 +154,36 @@ void EditorState::destroyScene()
 
 	saveSettings(userSettingsFile);
 
-	delete mPropertiesPanelView;
+	delete mPropertiesPanelView;	
 	mPropertiesPanelView = nullptr;
 
 	delete mGroupMessage;
 
 	um->shutdown();
-	delete um;
+	delete um;		
 	um = nullptr;
 
 	ew->shutdown();
-	delete ew;
+	delete ew;		
 	ew = nullptr;
 
 	wt->shutdown();
-	delete wt;
+	delete wt;						
 	wt = nullptr;
 
-	delete mToolTip;
+	delete mToolTip;				
 	mToolTip = nullptr;
 
-	delete mSettingsWindow;
+	delete mSettingsWindow;			
 	mSettingsWindow = nullptr;
 
-	delete mCodeGenerator;
-	mCodeGenerator = nullptr;
-
-	delete mMetaSolutionWindow;
+	delete mMetaSolutionWindow;		
 	mMetaSolutionWindow = nullptr;
 
-	delete mWidgetsWindow;
+	delete mWidgetsWindow;			
 	mWidgetsWindow = nullptr;
 
-	delete mOpenSaveFileDialog;
+	delete mOpenSaveFileDialog;		
 	mOpenSaveFileDialog = nullptr;
 
 	MyGUI::LogManager::unregisterSection(LogSection);
@@ -197,10 +191,10 @@ void EditorState::destroyScene()
 
 void EditorState::createMainMenu()
 {
-	MyGUI::VectorWidgetPtr menu_items = MyGUI::LayoutManager::getInstance().loadLayout("interface_menu.layout");
+	MyGUI::VectorWidgetPtr menu_items = MyGUI::LayoutManager::getInstance().load("interface_menu.layout");
 	MYGUI_ASSERT(menu_items.size() == 1, "Error load main menu");
 	bar = menu_items[0]->castType<MyGUI::MenuBar>();
-	bar->setCoord(0, 0, bar->getParentSize().width, bar->getHeight());
+	bar->setCoord(0, 0, getGUI()->getViewSize().width, bar->getHeight());
 
 	// главное меню
 	MyGUI::MenuItem* menu_file = bar->getItemById("File");
@@ -261,10 +255,6 @@ void EditorState::notifyPopupMenuAccept(MyGUI::MenuCtrl* _sender, MyGUI::MenuIte
 		else if (id == "File/Test")
 		{
 			notifyTest();
-		}
-		else if (id == "File/Code_Generator")
-		{
-			mCodeGenerator->getMainWidget()->setVisible(true);
 		}
 		else if (id == "File/RecentFiles")
 		{
@@ -343,6 +333,11 @@ void EditorState::injectMousePress(int _absx, int _absy, MyGUI::MouseButton _id)
 	// юбилейный комит  =)
 	mWidgetsWindow->startNewWidget(x1, y1, _id);
 
+	// это чтобы можно было двигать прямоугольник у невидимых виджето (или виджетов за границами)
+	//MyGUI::LayerItemInfoPtr rootItem = nullptr;
+	//MyGUI::Widget* itemWithRect = static_cast<MyGUI::Widget*>(MyGUI::LayerManager::getInstance().findWidgetItem(_absx, _absy, rootItem));
+	// не стал это доделывать, т.к. неоднозначность выбора виджета получается, если кто скажет как выбирать - сделаю
+
 	MyGUI::Widget* item = MyGUI::LayerManager::getInstance().getWidgetFromPoint(_absx, _absy);
 
 	// не убираем прямоугольник если нажали на его растягивалку
@@ -380,17 +375,16 @@ void EditorState::injectMousePress(int _absx, int _absy, MyGUI::MouseButton _id)
 			if (mWidgetsWindow->getCreatingStatus() != 1)
 			{
 				//FIXME
-				MyGUI::InputManager::getInstance().injectMouseMove(_absx, _absy, 0);// это чтобы сразу можно было тащить
+				getGUI()->injectMouseMove(_absx, _absy, 0);// это чтобы сразу можно было тащить
 			}
 		}
 		//FIXME
-		MyGUI::InputManager::getInstance().injectMouseRelease(_absx, _absy, _id);
-		MyGUI::InputManager::getInstance().injectMousePress(_absx, _absy, _id);
+		getGUI()->injectMousePress(_absx, _absy, _id);
 	}
 	else
 	{
 		//FIXME
-		MyGUI::InputManager::getInstance().injectMousePress(_absx, _absy, _id);
+		getGUI()->injectMousePress(_absx, _absy, _id);
 		notifySelectWidget(nullptr);
 	}
 
@@ -456,7 +450,7 @@ void EditorState::injectKeyPress(MyGUI::KeyCode _key, MyGUI::Char _text)
 			}
 		}
 
-		MyGUI::InputManager::getInstance().injectKeyPress(_key, _text);
+		getGUI()->injectKeyPress(_key, _text);
 		//base::BaseManager::injectKeyPress(_key, _text);
 		return;
 	}
@@ -506,20 +500,10 @@ void EditorState::injectKeyPress(MyGUI::KeyCode _key, MyGUI::Char _text)
 				mPropertiesPanelView->toggleRelativeMode();
 				return;
 			}
-			else if (_key == MyGUI::KeyCode::F11)
-			{
-				getStatisticInfo()->setVisible(!getStatisticInfo()->getVisible());
-				return;
-			}
-			else if (_key == MyGUI::KeyCode::F12)
-			{
-				getFocusInput()->setFocusVisible(!getFocusInput()->getFocusVisible());
-				return;
-			}
 		}
 	}
 
-	MyGUI::InputManager::getInstance().injectKeyPress(_key, _text);
+	getGUI()->injectKeyPress(_key, _text);
 	//base::BaseManager::injectKeyPress(_key, _text);
 }
 //===================================================================================
@@ -741,10 +725,6 @@ void EditorState::notifySettings()
 
 void EditorState::notifyTest()
 {
-	testLayout = ew->savexmlDocument();
-	ew->clear();
-	notifySelectWidget(nullptr);
-
 	for (MyGUI::VectorWidgetPtr::iterator iter = interfaceWidgets.begin(); iter != interfaceWidgets.end(); ++iter)
 	{
 		if ((*iter)->isVisible())
@@ -753,7 +733,9 @@ void EditorState::notifyTest()
 			(*iter)->setVisible(false);
 		}
 	}
-
+	testLayout = ew->savexmlDocument();
+	ew->clear();
+	notifySelectWidget(nullptr);
 	ew->loadxmlDocument(testLayout, true);
 	testMode = true;
 }
@@ -1022,16 +1004,11 @@ void EditorState::notifyToolTip(MyGUI::Widget* _sender, const MyGUI::ToolTipInfo
 {
 	if (_info.type == MyGUI::ToolTipInfo::Show)
 	{
-		mToolTip->show(_sender);
-		mToolTip->move(_info.point);
+		mToolTip->show(_sender, _info.point);
 	}
 	else if (_info.type == MyGUI::ToolTipInfo::Hide)
 	{
 		mToolTip->hide();
-	}
-	else if (_info.type == MyGUI::ToolTipInfo::Move)
-	{
-		mToolTip->move(_info.point);
 	}
 }
 
@@ -1098,109 +1075,6 @@ bool EditorState::saveOrLoadLayout(bool Save, bool Silent, const MyGUI::UString&
 			);
 	}
 
-	return false;
-}
-
-void EditorState::prepare(int argc, char **argv)
-{
-	// устанавливаем локаль из переменной окружения
-	// без этого не будут открываться наши файлы
-	mLocale = ::setlocale( LC_ALL, "" );
-	// erase everything after '_' to get language name
-	mLocale.erase(std::find(mLocale.begin(), mLocale.end(), '_'), mLocale.end());
-	if (mLocale == "ru") mLocale = "Russian";
-	else if (mLocale == "en") mLocale = "English";
-
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-	// при дропе файл может быть запущен в любой дирректории
-	char buff[MAX_PATH];
-	::GetModuleFileNameA(0, buff, MAX_PATH);
-
-	std::string dir = buff;
-	size_t pos = dir.find_last_of("\\/");
-	if (pos != dir.npos)
-	{
-		// устанавливаем правильную дирректорию
-		::SetCurrentDirectoryA(dir.substr(0, pos+1).c_str());
-	}
-
-	// имена могут содержать пробелы, необходимо
-	//склеивать и проверять файлы на существование
-	std::ifstream stream;
-	std::string tmp;
-	std::string delims = " ";
-	std::string source = *argv;
-	size_t start = source.find_first_not_of(delims);
-	while (start != source.npos)
-	{
-		size_t end = source.find_first_of(delims, start);
-		if (end != source.npos)
-		{
-			tmp += source.substr(start, end-start);
-
-			// имена могут быть в ковычках
-			if (tmp.size() > 2)
-			{
-				if ((tmp[0] == '"') && (tmp[tmp.size()-1] == '"'))
-				{
-					tmp = tmp.substr(1, tmp.size()-2);
-				}
-			}
-
-			stream.open(tmp.c_str());
-			if (stream.is_open())
-			{
-				mParams.push_back(tmp);
-				tmp.clear();
-				stream.close();
-			}
-			else
-				tmp += delims;
-		}
-		else
-		{
-			tmp += source.substr(start);
-
-			// имена могут быть в ковычках
-			if (tmp.size() > 2)
-			{
-				if ((tmp[0] == '"') && (tmp[tmp.size()-1] == '"'))
-				{
-					tmp = tmp.substr(1, tmp.size()-2);
-				}
-			}
-
-			stream.open(tmp.c_str());
-			if (stream.is_open())
-			{
-				mParams.push_back(tmp);
-				tmp.clear();
-				stream.close();
-			}
-			else
-				tmp += delims;
-			break;
-		}
-		start = source.find_first_not_of(delims, end + 1);
-	};
-
-#else
-#endif
-}
-
-void EditorState::onFileDrop(const std::string& _filename)
-{
-	saveOrLoadLayout(false, false, _filename);
-}
-
-bool EditorState::onWinodwClose(size_t _handle)
-{
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-	if (::IsIconic((HWND)_handle))
-		ShowWindow((HWND)_handle, SW_SHOWNORMAL);
-#endif
-
-	notifyQuit();
 	return false;
 }
 

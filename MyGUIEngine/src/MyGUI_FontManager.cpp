@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -34,7 +35,7 @@ namespace MyGUI
 	const std::string XML_TYPE_PROPERTY("Property");
 	const std::string RESOURCE_DEFAULT_NAME("Default");
 
-	template <> const char* Singleton<FontManager>::INSTANCE_TYPE_NAME("FontManager");
+	MYGUI_INSTANCE_IMPLEMENT( FontManager )
 
 	void FontManager::initialise()
 	{
@@ -64,6 +65,11 @@ namespace MyGUI
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully shutdown");
 		mIsInitialise = false;
+	}
+
+	bool FontManager::load(const std::string& _file)
+	{
+		return MyGUI::ResourceManager::getInstance()._loadImplement(_file, true, XML_TYPE, INSTANCE_TYPE_NAME);
 	}
 
 	void FontManager::_load(xml::ElementPtr _node, const std::string& _file, Version _version)
@@ -180,7 +186,7 @@ namespace MyGUI
 						codenew->addAttribute("coord", tmp);
 				}
 
-				ResourceManager::getInstance().loadFromXmlNode(root, _file, _version);
+				ResourceManager::getInstance()._load(root, _file, _version);
 			}
 			else if (font->getName() == XML_TYPE_PROPERTY)
 			{
@@ -205,24 +211,9 @@ namespace MyGUI
 			result = ResourceManager::getInstance().getByName(_name, false);
 
 		if (result == nullptr)
-		{
 			result = ResourceManager::getInstance().getByName(mDefaultName, false);
-			if (!_name.empty() && _name != RESOURCE_DEFAULT_NAME)
-			{
-				MYGUI_LOG(Error, "Font '" << _name << "' not found. Replaced with default font.");
-			}
-		}
 
 		return result ? result->castType<IFont>(false) : nullptr;
 	}
-
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-	bool FontManager::load(const std::string& _file)
-	{
-		return ResourceManager::getInstance().load(_file);
-	}
-
-#endif // MYGUI_DONT_USE_OBSOLETE
 
 } // namespace MyGUI

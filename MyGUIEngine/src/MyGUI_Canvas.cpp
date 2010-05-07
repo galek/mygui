@@ -2,6 +2,7 @@
 	@file
 	@author		Alexander Ptakhin
 	@date		01/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -21,6 +22,7 @@
 */
 #include "MyGUI_Precompiled.h"
 #include "MyGUI_Canvas.h"
+#include "MyGUI_ResourceManager.h"
 #include "MyGUI_Gui.h"
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_Bitwise.h"
@@ -44,11 +46,9 @@ namespace MyGUI
 		Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
 	}
 
-	void Canvas::_shutdown()
+	Canvas::~Canvas()
 	{
 		_destroyTexture( false );
-
-		Base::_shutdown();
 	}
 
 	void Canvas::createTexture( TextureResizeMode _resizeMode, TextureUsage _usage, PixelFormat _format )
@@ -153,7 +153,6 @@ namespace MyGUI
 		_width = Bitwise::firstPO2From(_width);
 		_height = Bitwise::firstPO2From(_height);
 
-
 		// restore usage and format
 		if ( mTexture != nullptr )
 		{
@@ -205,7 +204,7 @@ namespace MyGUI
 	{
 		void* data = mTexture->lock(_usage);
 
-		mTexData = reinterpret_cast<uint8_t*>(data);
+		mTexData = reinterpret_cast< uint8* >( data );
 
 		return data;
 	}

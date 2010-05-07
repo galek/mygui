@@ -176,13 +176,7 @@ namespace wrapper
 			_type == "char" ||
 			_type == "unsigned char" ||
 			_type == "size_t" ||
-			_type == "float" ||
-			_type == "uint32_t" ||
-			_type == "uint16_t" ||
-			_type == "uint8_t" ||
-			_type == "int32_t" ||
-			_type == "int16_t" ||
-			_type == "int8_t"
+			_type == "float"
 			) return _type;
 		return _namespace + "::" + _type;
 	}

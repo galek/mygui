@@ -61,9 +61,10 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 		if (MYGUI_BUILD_TYPE STREQUAL "debug")
 			if(MYGUI_GCC_VERSION VERSION_LESS "4.2")
 				message(STATUS "Skipping -fvisibility-inlines-hidden due to possible bug in g++ < 4.2")
-			else ()
+			else() # double if because of bug in CMake 2.6
 				set(MYGUI_GCC_VISIBILITY_FLAGS "${MYGUI_GCC_VISIBILITY_FLAGS} -fvisibility-inlines-hidden")
 			endif()
+		else ()
 			set(MYGUI_GCC_VISIBILITY_FLAGS "${MYGUI_GCC_VISIBILITY_FLAGS} -fvisibility-inlines-hidden")
 		endif ()
 	endif (MYGUI_GCC_VISIBILITY)
@@ -135,46 +136,25 @@ set(MYGUI_SAMPLES_INPUT 1 CACHE STRING
   3 - Win32 (Mouse) + OIS (Keyboard)"
 )
 
-# Used to not annoy users with warnings (should be TRUE for developers)
-option(MYGUI_HIGH_LEVEL_WARNINGS "Use high level compiler warnings. Developers should enable this." FALSE)
-
 # Set compiler specific build flags
 if (CMAKE_COMPILER_IS_GNUCXX)
+	add_definitions(-fdiagnostics-show-option)
 	add_definitions(-msse)
-	if (NOT MYGUI_HIGH_LEVEL_WARNINGS)
-		add_definitions(-w)
-	else ()
-		if (MYGUI_RENDERSYSTEM EQUAL 2)
-			# to avoid warnings from OGRE sources
-			add_definitions(-isystem ${OGRE_INCLUDE_DIR})
-		endif ()
-		add_definitions(-fdiagnostics-show-option)
-		# very interesting option, but way too many warnings
-		#add_definitions(-Weffc++)
-		add_definitions(-Wno-deprecated -Wall -Wctor-dtor-privacy -Winit-self -Woverloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter)
-		add_definitions(-pedantic)
-
-		# MyGUI_UString.h ignored from warnings because of this
-		add_definitions(-Wshadow)
+	if (MYGUI_RENDERSYSTEM EQUAL 2)
+		# to avoid warnings from OGRE sources
+		add_definitions(-isystem ${OGRE_INCLUDE_DIR})
 	endif ()
+	# very interesting option, but way too many warnings
+	#add_definitions(-Weffc++)
+	add_definitions(-Wno-deprecated -Wall -Wctor-dtor-privacy -Winit-self -Woverloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-unused-parameter)
+	#add_definitions(-pedantic)
+
+	# MyGUI_UString.h ignored from warnings because of this
+	add_definitions(-Wshadow)
 endif ()
 
 if (MSVC)
 	add_definitions(/fp:fast)
-	
-	# Use the highest warning level for visual studio.
-	if (MYGUI_HIGH_LEVEL_WARNINGS)
-		SET(WARNING_LEVEL "/W4")
-	else ()
-		SET(WARNING_LEVEL "/W3")
-	endif ()
-
-	if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-		STRING(REGEX REPLACE "/W[0-4]" "${WARNING_LEVEL}" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	else ()
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_LEVEL}")
-	endif ()
-
 endif ()
 
 # Find dependencies
@@ -205,10 +185,6 @@ add_subdirectory(MyGUIEngine)
 
 # Setup Platforms
 add_subdirectory(Platforms)
-
-if (MYGUI_BUILD_SAMPLES OR MYGUI_BUILD_TOOLS OR MYGUI_BUILD_TESTS)
-	add_subdirectory(Common)
-endif ()
 
 # Setup Plugins
 if (MYGUI_BUILD_PLUGINS)

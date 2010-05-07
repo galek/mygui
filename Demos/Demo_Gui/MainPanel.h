@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 #ifndef __MAIN_PANEL_H__
 #define __MAIN_PANEL_H__

@@ -2,6 +2,7 @@
 	@file
 	@author     Pavel Turin
 	@date       08/2009
+	@module
 */
 #ifndef __TREE_CONTROL_H__
 #define __TREE_CONTROL_H__
@@ -58,7 +59,6 @@ namespace MyGUI
         TreeControl();
 
         virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-		virtual void _shutdown();
 
         Node* getRoot() const;
         void setRootVisible(bool bValue);
@@ -81,6 +81,8 @@ namespace MyGUI
         EventHandle_TreeControlPtrSizeT eventTreeScrolled;
 
     protected:
+        virtual ~TreeControl();
+
         void notifyMousePressed(Widget* pSender, int nLeft, int nTop, MouseButton nID);
         void notifyMouseWheel(Widget* pSender, int nValue);
         void notifyMouseDoubleClick(Widget* pSender);
@@ -123,7 +125,7 @@ namespace MyGUI
         int mnScrollRange;
         int mnTopIndex;
         int mnTopOffset;
-        size_t mnFocusIndex;
+        int mnFocusIndex;
         Node* mpSelection;
         Node* mpRoot;
         size_t mnExpandedNodes;

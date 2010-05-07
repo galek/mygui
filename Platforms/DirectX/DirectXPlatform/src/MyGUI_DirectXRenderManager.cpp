@@ -17,13 +17,7 @@
 namespace MyGUI
 {
 
-	template <> const char* Singleton<DirectXRenderManager>::INSTANCE_TYPE_NAME("DirectXRenderManager");
-
-	DirectXRenderManager::DirectXRenderManager() :
-		mpD3DDevice(nullptr),
-		mUpdate(false)
-	{
-	}
+	MYGUI_INSTANCE_IMPLEMENT( DirectXRenderManager )
 
 	void DirectXRenderManager::initialise(IDirect3DDevice9 *_device)
 	{
@@ -82,14 +76,14 @@ namespace MyGUI
 
 	void DirectXRenderManager::drawOneFrame()
 	{
-		Gui* gui = Gui::getInstancePtr();
-		if (gui == nullptr) return;
 		static Timer timer;
 		static unsigned long last_time = timer.getMilliseconds();
 		unsigned long now_time = timer.getMilliseconds();
 		unsigned long time = now_time - last_time;
 
-		gui->_injectFrameEntered((float)((double)(time) / (double)1000));
+		Gui* gui = Gui::getInstancePtr();
+		if (gui != nullptr)
+			gui->_injectFrameEntered((float)((double)(time) / (double)1000));
 
 		last_time = now_time;
 
@@ -196,7 +190,7 @@ namespace MyGUI
 		Gui* gui = Gui::getInstancePtr();
 		if (gui != nullptr)
 		{
-			gui->_resizeWindow(mViewSize);
+			gui->resizeWindow(mViewSize);
 			mUpdate = true;
 		}
 	}

@@ -2,6 +2,7 @@
     @file
     @author     Albert Semenov
     @date       08/2008
+    @module
 */
 #ifndef __FADE_NODE_ANIMATOR_H__
 #define __FADE_NODE_ANIMATOR_H__

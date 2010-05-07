@@ -18,13 +18,11 @@ namespace MyGUI
 	{
 	}
 
-	void BerkeliumWidget::_shutdown()
+	BerkeliumWidget::~BerkeliumWidget()
 	{
 		requestUpdateCanvas = nullptr;
 
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void BerkeliumWidget::updateSize()
@@ -147,7 +145,7 @@ namespace MyGUI
 	void BerkeliumWidget::onMouseDrag(int _left, int _top)
 	{
 		if (mWindow != nullptr)
-			mWindow->mouseMoved(_left - getAbsoluteLeft(), _top - getAbsoluteTop());
+			mWindow->mouseMoved(_left - getLeft(), _top - getTop());
 
 		Base::onMouseDrag(_left, _top);
 	}
@@ -155,7 +153,7 @@ namespace MyGUI
 	void BerkeliumWidget::onMouseMove(int _left, int _top)
 	{
 		if (mWindow != nullptr)
-			mWindow->mouseMoved(_left - getAbsoluteLeft(), _top - getAbsoluteTop());
+			mWindow->mouseMoved(_left - getLeft(), _top - getTop());
 
 		Base::onMouseMove(_left, _top);
 	}

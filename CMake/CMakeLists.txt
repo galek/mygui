@@ -10,9 +10,11 @@ else(WIN32)
 	set(MYGUI_CMAKE_DIR "lib/MYGUI/cmake")
 endif(WIN32)
 
+include (InstallResources.cmake)
+
 set(INST_FILES
   Packages/FindOIS.cmake
-  Packages/FindOGRE.cmake
+  Packages/FindOGRE_Old.cmake
   Utils/FindPkgMacros.cmake
   Utils/PreprocessorUtils.cmake
   Utils/MyGUIConfigTargets.cmake

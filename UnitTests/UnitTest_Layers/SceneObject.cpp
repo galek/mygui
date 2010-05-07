@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2009
+	@module
 */
 
 #include "SceneObject.h"
@@ -15,8 +16,8 @@ namespace demo
 	SceneObject::SceneObject() :
 		mTextureCoords(nullptr),
 		mVertices(nullptr),
-		mIndices(nullptr),
 		mVertexCount(0),
+		mIndices(nullptr),
 		mIndexCount(0),
 		mUScale(1),
 		mVScale(1),
@@ -151,7 +152,7 @@ namespace demo
 			unsigned short* pShort = reinterpret_cast<unsigned short*>(pLong);
 
 
-			//size_t offset = (submesh->useSharedVertices)? shared_offset : current_offset;
+			size_t offset = (submesh->useSharedVertices)? shared_offset : current_offset;
 
 			// Ogre 1.6 patch (commenting the static_cast...) - index offsets start from 0 for each submesh
 			if ( use32bitindexes )
@@ -204,47 +205,51 @@ namespace demo
 		Ogre::Vector3 closest_result;
 
 		// test for hitting individual triangles on the mesh
-		bool new_closest_found = false;
+        bool new_closest_found = false;
 		int index_found = 0;
-		for (int i = 0; i < static_cast<int>(mIndexCount); i += 3)
-		{
-			// check for a hit against this triangle
-			std::pair<bool, Ogre::Real> hit = Ogre::Math::intersects(_ray, mVertices[mIndices[i]],
-				mVertices[mIndices[i+1]], mVertices[mIndices[i+2]], true, false);
+        for (int i = 0; i < static_cast<int>(mIndexCount); i += 3)
+        {
+            // check for a hit against this triangle
+            std::pair<bool, Ogre::Real> hit = Ogre::Math::intersects(_ray, mVertices[mIndices[i]],
+                mVertices[mIndices[i+1]], mVertices[mIndices[i+2]], true, false);
 
-			// if it was a hit check if its the closest
-			if (hit.first)
-			{
-				if ((closest_distance < 0.0f) ||
-					(hit.second < closest_distance))
-				{
-					// this is the closest so far, save it off
-					closest_distance = hit.second;
+            // if it was a hit check if its the closest
+            if (hit.first)
+            {
+                if ((closest_distance < 0.0f) ||
+                    (hit.second < closest_distance))
+                {
+                    // this is the closest so far, save it off
+                    closest_distance = hit.second;
 					index_found = i;
-					new_closest_found = true;
-				}
-			}
-		}
+                    new_closest_found = true;
+                }
+            }
+        }
 
 		if (new_closest_found)
+        {
+            closest_result = _ray.getPoint(closest_distance);               
+        }
+
+		// return the result
+		if (closest_distance >= 0.0f)
 		{
-			closest_result = _ray.getPoint(closest_distance);               
+			// raycast success
+			Ogre::Vector2 point = getCoordByTriangle(closest_result, mVertices[mIndices[index_found]], mVertices[mIndices[index_found+1]], mVertices[mIndices[index_found+2]]);
+			Ogre::Vector2 point2 = getCoordByRel(point, mTextureCoords[mIndices[index_found]], mTextureCoords[mIndices[index_found+1]], mTextureCoords[mIndices[index_found+2]]);
 
-			// return the result
-			if (closest_distance >= 0.0f)
-			{
-				// raycast success
-				Ogre::Vector2 point = getCoordByTriangle(closest_result, mVertices[mIndices[index_found]], mVertices[mIndices[index_found+1]], mVertices[mIndices[index_found+2]]);
-				Ogre::Vector2 point2 = getCoordByRel(point, mTextureCoords[mIndices[index_found]], mTextureCoords[mIndices[index_found+1]], mTextureCoords[mIndices[index_found+2]]);
+			_x = (int)(point2.x * _texture_width);
+			_y = (int)(point2.y * _texture_height);
 
-				_x = (int)(point2.x * _texture_width);
-				_y = (int)(point2.y * _texture_height);
-
-				return true;
-			}
+			return true;
 		}
+		else
+		{
+			// raycast failed
+			return false;
+		} 
 
-		// raycast failed
 		return false;
 	}
 
@@ -291,7 +296,7 @@ namespace demo
 		{
 			float count = 1 / mUScale; // колличество тайлов
 			float x = result.x * count; // пропорцией узнаем положение
-			result.x  = x + 0.5f; // смещаем на половину, чтобы центр тайла был в середине
+			result.x  = x + 0.5; // смещаем на половину, чтобы центр тайла был в середине
 			result.x = fmod(result.x, 1); // отбрасываем до запятой получая от 0 до 1
 		}
 
@@ -299,7 +304,7 @@ namespace demo
 		{
 			float count = 1 / mVScale; // колличество тайлов
 			float y = result.y * count; // пропорцией узнаем положение
-			result.y  = y + 0.5f; // смещаем на половину, чтобы центр тайла был в середине
+			result.y  = y + 0.5; // смещаем на половину, чтобы центр тайла был в середине
 			result.y = fmod(result.y, 1); // отбрасываем до запятой получая от 0 до 1
 		}
 

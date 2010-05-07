@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		08/2008
+	@module
 */
 #include "precompiled.h"
 #include "FontView.h"
@@ -19,7 +20,7 @@ namespace demo
 		MyGUI::ResourceManager& manager = MyGUI::ResourceManager::getInstance();
 		if (!manager.isExist(_value)) return;
 
-		int height = (manager.getByName(_value)->castType<MyGUI::IFont>())->getDefaultHeight();
+		unsigned int height = (manager.getByName(_value)->castType<MyGUI::IFont>())->getDefaultHeight();
 
 		mEditView->setFontName(_value);
 		mEditView->setFontHeight(height);

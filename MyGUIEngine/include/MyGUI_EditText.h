@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -30,7 +31,6 @@
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_RenderFormat.h"
 #include "MyGUI_TextView.h"
-#include "MyGUI_ColourARGB.h"
 
 namespace MyGUI
 {
@@ -117,14 +117,16 @@ namespace MyGUI
 
 	/*internal:*/
 		void _setAlign(const IntSize& _oldsize, bool _update);
+		void _setAlign(const IntCoord& _oldcoord, bool _update);
 
 	private:
 		void _setTextColour(const Colour& _value);
 
 	protected:
 		bool mEmptyView;
-		ColourARGB mCurrentColour;
-		ColourARGB mInverseColour;
+		uint32 mCurrentColour;
+		uint32 mInverseColour;
+		uint32 mCurrentAlpha;
 		IntCoord mCurrentCoord;
 
 		UString mCaption;

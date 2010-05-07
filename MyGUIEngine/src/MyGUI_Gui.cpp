@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -40,40 +41,45 @@
 #include "MyGUI_ResourceManager.h"
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_FactoryManager.h"
-#include "MyGUI_ToolTipManager.h"
 
 namespace MyGUI
 {
 
-	template <> const char* Singleton<Gui>::INSTANCE_TYPE_NAME("Gui");
+	const std::string INSTANCE_TYPE_NAME("Gui");
+
+	Gui* Gui::msInstance = nullptr;
+
+	Gui* Gui::getInstancePtr()
+	{
+		return msInstance;
+	}
+
+	Gui& Gui::getInstance()
+	{
+		MYGUI_ASSERT(0 != msInstance, "instance " << INSTANCE_TYPE_NAME << " was not created");
+		return (*msInstance);
+	}
 
 	Gui::Gui() :
-		mInputManager(nullptr),
-		mSubWidgetManager(nullptr),
-		mLayerManager(nullptr),
-		mSkinManager(nullptr),
-		mWidgetManager(nullptr),
-		mFontManager(nullptr),
-		mControllerManager(nullptr),
-		mPointerManager(nullptr),
-		mClipboardManager(nullptr),
-		mLayoutManager(nullptr),
-		mDynLibManager(nullptr),
-		mPluginManager(nullptr),
-		mLanguageManager(nullptr),
-		mResourceManager(nullptr),
-		mFactoryManager(nullptr),
-		mToolTipManager(nullptr)
+		mIsInitialise(false)
 	{
+		MYGUI_ASSERT(0 == msInstance, "instance " << INSTANCE_TYPE_NAME << " is exsist");
+		msInstance = this;
+	}
+
+	Gui::~Gui()
+	{
+		msInstance = nullptr;
 	}
 
 	void Gui::initialise(const std::string& _core, const std::string& _logFileName)
 	{
-		//LogManager::getInstance().registerSection(MYGUI_LOG_SECTION);
+		// самый первый лог
+		LogManager::registerSection(MYGUI_LOG_SECTION, _logFileName);
 
 		MYGUI_ASSERT(!mIsInitialise, INSTANCE_TYPE_NAME << " initialised twice");
-		MYGUI_LOG(Info, "* Initialise: " << INSTANCE_TYPE_NAME);
 
+		MYGUI_LOG(Info, "* Initialise: " << INSTANCE_TYPE_NAME);
 		MYGUI_LOG(Info, "* MyGUI version "
 			<< MYGUI_VERSION_MAJOR << "."
 			<< MYGUI_VERSION_MINOR << "."
@@ -95,7 +101,6 @@ namespace MyGUI
 		mPluginManager = new PluginManager();
 		mLanguageManager = new LanguageManager();
 		mFactoryManager = new FactoryManager();
-		mToolTipManager = new ToolTipManager();
 
 		mResourceManager->initialise();
 		mLayerManager->initialise();
@@ -112,7 +117,6 @@ namespace MyGUI
 		mPluginManager->initialise();
 		mLanguageManager->initialise();
 		mFactoryManager->initialise();
-		mToolTipManager->initialise();
 
 		WidgetManager::getInstance().registerUnlinker(this);
 
@@ -120,7 +124,7 @@ namespace MyGUI
 		if ( _core.empty() == false ) mResourceManager->load(_core);
 
 		mViewSize = RenderManager::getInstance().getViewSize();
-		_resizeWindow(mViewSize);
+		resizeWindow(mViewSize);
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully initialized");
 		mIsInitialise = true;
@@ -148,7 +152,6 @@ namespace MyGUI
 		mLanguageManager->shutdown();
 		mResourceManager->shutdown();
 		mFactoryManager->shutdown();
-		mToolTipManager->shutdown();
 
 		WidgetManager::getInstance().unregisterUnlinker(this);
 		mWidgetManager->shutdown();
@@ -168,13 +171,22 @@ namespace MyGUI
 		delete mLanguageManager;
 		delete mResourceManager;
 		delete mFactoryManager;
-		delete mToolTipManager;
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully shutdown");
-		mIsInitialise = false;
 
-		//LogManager::getInstance().unregisterSection(MYGUI_LOG_SECTION);
+		// last gui log
+		LogManager::unregisterSection(MYGUI_LOG_SECTION);
+
+		mIsInitialise = false;
 	}
+
+	bool Gui::injectMouseMove( int _absx, int _absy, int _absz) { return mInputManager->injectMouseMove(_absx, _absy, _absz); }
+	bool Gui::injectMousePress( int _absx, int _absy, MouseButton _id ) { return mInputManager->injectMousePress(_absx, _absy, _id); }
+	bool Gui::injectMouseRelease( int _absx, int _absy, MouseButton _id ) { return mInputManager->injectMouseRelease(_absx, _absy, _id); }
+
+	bool Gui::injectKeyPress(KeyCode _key, Char _text) { return mInputManager->injectKeyPress(_key, _text); }
+	bool Gui::injectKeyRelease(KeyCode _key) { return mInputManager->injectKeyRelease(_key); }
+
 
 	Widget* Gui::baseCreateWidget(WidgetStyle _style, const std::string& _type, const std::string& _skin, const IntCoord& _coord, Align _align, const std::string& _layer, const std::string& _name)
 	{
@@ -239,6 +251,11 @@ namespace MyGUI
 		}
 	}
 
+	bool Gui::load(const std::string& _file)
+	{
+		return mResourceManager->load(_file);
+	}
+
 	void Gui::destroyWidget(Widget* _widget)
 	{
 		mWidgetManager->destroyWidget(_widget);
@@ -252,6 +269,16 @@ namespace MyGUI
 	void Gui::destroyWidgets(EnumeratorWidgetPtr& _widgets)
 	{
 		mWidgetManager->destroyWidgets(_widgets);
+	}
+
+	void Gui::setVisiblePointer(bool _value)
+	{
+		mPointerManager->setVisible(_value);
+	}
+
+	bool Gui::isVisiblePointer()
+	{
+		return mPointerManager->isVisible();
 	}
 
 	void Gui::_injectFrameEntered(float _time)
@@ -278,7 +305,7 @@ namespace MyGUI
 		mWidgetChild.erase(iter);
 	}
 
-	void Gui::_resizeWindow(const IntSize& _size)
+	void Gui::resizeWindow(const IntSize& _size)
 	{
 		IntSize oldViewSize = mViewSize;
 		mViewSize = _size;
@@ -286,31 +313,8 @@ namespace MyGUI
 		// выравниваем рутовые окна
 		for (VectorWidgetPtr::iterator iter = mWidgetChild.begin(); iter!=mWidgetChild.end(); ++iter)
 		{
-			(*iter)->updateArrange(IntCoord(0, 0,  mViewSize.width, mViewSize.height), oldViewSize);
+			((ICroppedRectangle*)(*iter))->_setAlign(oldViewSize, true);
 		}
 	}
-
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-	bool Gui::injectMouseMove( int _absx, int _absy, int _absz) { return mInputManager->injectMouseMove(_absx, _absy, _absz); }
-	bool Gui::injectMousePress( int _absx, int _absy, MouseButton _id ) { return mInputManager->injectMousePress(_absx, _absy, _id); }
-	bool Gui::injectMouseRelease( int _absx, int _absy, MouseButton _id ) { return mInputManager->injectMouseRelease(_absx, _absy, _id); }
-
-	bool Gui::injectKeyPress(KeyCode _key, Char _text) { return mInputManager->injectKeyPress(_key, _text); }
-	bool Gui::injectKeyRelease(KeyCode _key) { return mInputManager->injectKeyRelease(_key); }
-
-	void Gui::hidePointer() { mPointerManager->setVisible(false); }
-	void Gui::showPointer() { mPointerManager->setVisible(true); }
-	bool Gui::isShowPointer() { return mPointerManager->isVisible(); }
-	void Gui::setVisiblePointer(bool _value)	 { mPointerManager->setVisible(_value); }
-	bool Gui::isVisiblePointer() { return mPointerManager->isVisible(); }
-
-	bool Gui::load(const std::string& _file) { return mResourceManager->load(_file); }
-
-	const IntSize& Gui::getViewSize() const { return RenderManager::getInstance().getViewSize(); }
-	int Gui::getViewWidth() { return RenderManager::getInstance().getViewSize().width; }
-	int Gui::getViewHeight() { return RenderManager::getInstance().getViewSize().height; }
-
-#endif // MYGUI_DONT_USE_OBSOLETE
 
 } // namespace MyGUI

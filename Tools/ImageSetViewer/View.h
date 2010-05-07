@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 #ifndef __VIEW_H__
 #define __VIEW_H__
@@ -37,6 +38,7 @@ namespace editor
 		MyGUI::ScrollView* mImageView;
 
 		MyGUI::Edit* mEditResourceName;
+		MyGUI::Edit* mEditResourceID;
 		MyGUI::Edit* mEditFileName;
 
 		struct PairAnim

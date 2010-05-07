@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		08/2008
+	@module
 */
 
 #include "precompiled.h"
@@ -14,24 +15,6 @@
 
 namespace base
 {
-
-#if MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE
-#include <CoreFoundation/CoreFoundation.h>
-	// This function will locate the path to our application on OS X,
-	// unlike windows you can not rely on the curent working directory
-	// for locating your configuration files and resources.
-	std::string macBundlePath()
-	{
-		char path[1024];
-		CFBundleRef mainBundle = CFBundleGetMainBundle();    assert(mainBundle);
-		CFURLRef mainBundleURL = CFBundleCopyBundleURL(mainBundle);    assert(mainBundleURL);
-		CFStringRef cfStringRef = CFURLCopyFileSystemPath( mainBundleURL, kCFURLPOSIXPathStyle);    assert(cfStringRef);
-		CFStringGetCString(cfStringRef, path, 1024, kCFStringEncodingASCII);
-		CFRelease(mainBundleURL);
-		CFRelease(cfStringRef);
-		return std::string(path);
-	}
-#endif
 
 	BaseManager::BaseManager() :
 		mGUI(nullptr),
@@ -49,7 +32,7 @@ namespace base
 		mNode(nullptr)
 	{
 		#if MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE
-			mResourcePath = macBundlePath() + "/Contents/Resources/";
+			mResourcePath = MyGUI::helper::macBundlePath() + "/Contents/Resources/";
 		#else
 			mResourcePath = "";
 		#endif
@@ -210,7 +193,6 @@ namespace base
 		mGUI->initialise(mResourceFileName);
 
 		mInfo = new diagnostic::StatisticInfo();
-		mFocusInfo = new diagnostic::InputFocusInfo();
 	}
 
 	void BaseManager::destroyGui()
@@ -352,7 +334,7 @@ namespace base
 	{
 		#if MYGUI_PLATFORM == MYGUI_PLATFORM_APPLE
 			// OS X does not set the working directory relative to the app, In order to make things portable on OS X we need to provide the loading with it's own bundle path location
-			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(Ogre::String(macBundlePath() + "/" + _name), _type, _group, _recursive);
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(Ogre::String(MyGUI::helper::macBundlePath() + "/" + _name), _type, _group, _recursive);
 		#else
 			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(_name, _type, _group, _recursive);
 		#endif
@@ -397,7 +379,7 @@ namespace base
 		if (!mGUI)
 			return;
 
-		MyGUI::InputManager::getInstance().injectMouseMove(_absx, _absy, _absz);
+		mGUI->injectMouseMove(_absx, _absy, _absz);
 	}
 
 	void BaseManager::injectMousePress(int _absx, int _absy, MyGUI::MouseButton _id)
@@ -405,7 +387,7 @@ namespace base
 		if (!mGUI)
 			return;
 
-		MyGUI::InputManager::getInstance().injectMousePress(_absx, _absy, _id);
+		mGUI->injectMousePress(_absx, _absy, _id);
 	}
 
 	void BaseManager::injectMouseRelease(int _absx, int _absy, MyGUI::MouseButton _id)
@@ -413,7 +395,7 @@ namespace base
 		if (!mGUI)
 			return;
 
-		MyGUI::InputManager::getInstance().injectMouseRelease(_absx, _absy, _id);
+		mGUI->injectMouseRelease(_absx, _absy, _id);
 	}
 
 	void BaseManager::injectKeyPress(MyGUI::KeyCode _key, MyGUI::Char _text)
@@ -449,6 +431,9 @@ namespace base
 		}
 		else if (_key == MyGUI::KeyCode::F12)
 		{
+			if (mFocusInfo == nullptr)
+				mFocusInfo = new diagnostic::InputFocusInfo();
+
 			bool visible = mFocusInfo->getFocusVisible();
 			mFocusInfo->setFocusVisible(!visible);
 		}
@@ -457,42 +442,7 @@ namespace base
 			MyGUI::LayerManager::getInstance().dumpStatisticToLog();
 		}
 
-		// change polygon more
-		else if (_key == MyGUI::KeyCode::F5)
-		{
-			getCamera()->setPolygonMode(Ogre::PM_SOLID);
-		}
-		else if (_key == MyGUI::KeyCode::F6)
-		{
-			getCamera()->setPolygonMode(Ogre::PM_WIREFRAME);
-		}
-		else if (_key == MyGUI::KeyCode::F7)
-		{
-			getCamera()->setPolygonMode(Ogre::PM_POINTS);
-		}
-#if OGRE_VERSION >= MYGUI_DEFINE_VERSION(1, 7, 0) && OGRE_NO_VIEWPORT_ORIENTATIONMODE == 0
-		else if (_key == MyGUI::KeyCode::F1)
-		{
-			mWindow->getViewport(0)->setOrientationMode(Ogre::OR_DEGREE_0, false);
-			mPlatform->getRenderManagerPtr()->setRenderWindow(mWindow);
-		}
-		else if (_key == MyGUI::KeyCode::F2)
-		{
-			mWindow->getViewport(0)->setOrientationMode(Ogre::OR_DEGREE_90, false);
-			mPlatform->getRenderManagerPtr()->setRenderWindow(mWindow);
-		}
-		else if (_key == MyGUI::KeyCode::F3)
-		{
-			mWindow->getViewport(0)->setOrientationMode(Ogre::OR_DEGREE_180, false);
-			mPlatform->getRenderManagerPtr()->setRenderWindow(mWindow);
-		}
-		else if (_key == MyGUI::KeyCode::F4)
-		{
-			mWindow->getViewport(0)->setOrientationMode(Ogre::OR_DEGREE_270, false);
-			mPlatform->getRenderManagerPtr()->setRenderWindow(mWindow);
-		}
-#endif
-		MyGUI::InputManager::getInstance().injectKeyPress(_key, _text);
+		mGUI->injectKeyPress(_key, _text);
 	}
 
 	void BaseManager::injectKeyRelease(MyGUI::KeyCode _key)
@@ -500,7 +450,7 @@ namespace base
 		if (!mGUI)
 			return;
 
-		MyGUI::InputManager::getInstance().injectKeyRelease(_key);
+		mGUI->injectKeyRelease(_key);
 	}
 
 } // namespace base

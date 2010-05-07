@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		05/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -27,7 +28,6 @@
 #include "MyGUI_Types.h"
 #include "MyGUI_ISubWidgetRect.h"
 #include "MyGUI_ResourceSkin.h"
-#include "MyGUI_ColourARGB.h"
 
 namespace MyGUI
 {
@@ -42,7 +42,7 @@ namespace MyGUI
 		TileRect();
 		virtual ~TileRect();
 
-		virtual void setAlpha(float _alpha);
+		void setAlpha(float _alpha);
 
 		virtual void setVisible(bool _visible);
 
@@ -59,16 +59,16 @@ namespace MyGUI
 		void _correctView();
 
 		void _setAlign(const IntSize& _oldsize, bool _update);
+		void _setAlign(const IntCoord& _oldcoord, bool _update);
 
 		virtual void _setUVSet(const FloatRect& _rect);
 		virtual void _setColour(const Colour& _value);
 
 	protected:
-		//FloatRect mRectTexture;
+		FloatRect mRectTexture;
 		bool mEmptyView;
 
-		VertexColourType mVertexFormat;
-		ColourARGB mCurrentColour;
+		uint32 mCurrentColour;
 
 		FloatRect mCurrentTexture;
 		IntCoord mCurrentCoord;

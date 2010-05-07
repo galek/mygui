@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		01/2009
+	@module
 */
 #ifndef __COLOUR_WINDOW_CELL_DATA_H__
 #define __COLOUR_WINDOW_CELL_DATA_H__
@@ -25,7 +26,7 @@ namespace demo
 		}
 
 		const std::string& getName() const { return m_name; }
-		const MyGUI::Colour& getColour() const { return m_colour; }
+		const MyGUI::Colour& getColour() { return m_colour; }
 
 
 	private:

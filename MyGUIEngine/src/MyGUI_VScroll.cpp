@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -54,11 +55,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void VScroll::_shutdown()
+	VScroll::~VScroll()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void VScroll::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -370,12 +369,12 @@ namespace MyGUI
 	{
 		if (mScrollRange < 2) return;
 
-		int offset = (int)mScrollPosition;
+		int offset = mScrollPosition;
 		if (_rel < 0) offset += SCROLL_MOUSE_WHEEL;
 		else offset -= SCROLL_MOUSE_WHEEL;
 
 		if (offset < 0) offset = 0;
-		else if (offset > (int)(mScrollRange - 1)) offset = (int)(mScrollRange - 1);
+		else if (offset > (int)(mScrollRange - 1)) offset = mScrollRange - 1;
 
 		if ((size_t)offset != mScrollPosition)
 		{

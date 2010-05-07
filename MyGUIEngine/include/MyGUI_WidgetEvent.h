@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -26,8 +27,7 @@
 #include "MyGUI_Macros.h"
 #include "MyGUI_WidgetDefines.h"
 #include "MyGUI_WidgetToolTip.h"
-#include "MyGUI_MouseButton.h"
-#include "MyGUI_KeyCode.h"
+#include "MyGUI_InputDefine.h"
 
 namespace MyGUI
 {
@@ -43,7 +43,7 @@ namespace MyGUI
 	typedef delegates::CDelegate2<Widget*, KeyCode> EventHandle_WidgetKeyCode;
 	typedef delegates::CDelegate3<Widget*, KeyCode, Char> EventHandle_WidgetKeyCodeChar;
 	typedef delegates::CDelegate3<Widget*, const std::string&, const std::string&> EventHandle_WidgetStringString;
-	//typedef delegates::CDelegate3<Widget*, Widget*&, size_t &> EventHandle_WidgetRefWidgetRefSizeT;
+	typedef delegates::CDelegate3<Widget*, Widget*&, size_t &> EventHandle_WidgetRefWidgetRefSizeT;
 	typedef delegates::CDelegate2<Widget*, const ToolTipInfo& > EventHandle_WidgetToolTip;
 
 	/**
@@ -72,14 +72,16 @@ namespace MyGUI
 
 	class MYGUI_EXPORT WidgetEvent
 	{
-		//friend class InputManager;
+		friend class InputManager;
 
-	public:
+    public:
 		virtual ~WidgetEvent() { }
 
 	protected:
 		WidgetEvent() :
-			mWidgetEventSender(0)
+			mWidgetEventSender(0),
+			mRootMouseActive(false),
+			mRootKeyActive(false)
 		{
 		}
 
@@ -218,7 +220,7 @@ namespace MyGUI
 			@param _container parent
 			@param _index of container
 		*/
-		//EventHandle_WidgetRefWidgetRefSizeT _requestGetContainer;
+		EventHandle_WidgetRefWidgetRefSizeT _requestGetContainer;
 
 		/** Event : Widget property changed through setProperty (in code, or from layout)\n
 			signature : void method(MyGUI::Widget* _sender, const std::string& _key, const std::string& _value);
@@ -228,8 +230,7 @@ namespace MyGUI
 		*/
 		EventHandle_WidgetStringString eventChangeProperty;
 
-
-	/*internal:*/
+	protected:
 
 		// !!! ОБЯЗАТЕЛЬНО в родительском классе вызывать последним
 		virtual void onMouseLostFocus(Widget* _new)
@@ -321,9 +322,12 @@ namespace MyGUI
 			eventRootKeyChangeFocus(mWidgetEventSender, _focus);
 		}
 
-	protected:
 		// от чьего имени мы посылаем сообщения
 		Widget* mWidgetEventSender;
+
+	private:
+		bool mRootMouseActive;
+		bool mRootKeyActive;
 	};
 
 } // namespace MyGUI

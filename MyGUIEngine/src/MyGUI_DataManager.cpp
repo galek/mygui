@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		05/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -29,7 +30,8 @@ namespace MyGUI
 
 	DataManager* DataManager::msInstance = 0;
 
-	DataManager::DataManager()
+	DataManager::DataManager() :
+		mIsInitialise(false)
 	{
 		MYGUI_ASSERT(0 == msInstance, "instance " << INSTANCE_TYPE_NAME << " is exsist");
 		msInstance = this;

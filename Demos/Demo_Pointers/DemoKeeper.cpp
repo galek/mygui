@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		08/2008
+	@module
 */
 #include "precompiled.h"
 #include "DemoKeeper.h"
@@ -40,19 +41,19 @@ namespace demo
 	{
 		createEntities();
 
-		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().loadLayout("BackHelp.layout");
+		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().load("BackHelp.layout");
 		root.at(0)->findWidget("Text")->setCaption("");
 
 		MyGUI::FactoryManager::getInstance().registerFactory<ResourcePointerContext>("Resource");
 
-		MyGUI::ResourceManager::getInstance().load("Contexts.xml");
+		getGUI()->load("Contexts.xml");
 
 #ifdef MYGUI_SAMPLES_INPUT_OIS
-		MyGUI::ResourceManager::getInstance().load("Pointers.xml");
+		getGUI()->load("Pointers.xml");
 #elif MYGUI_SAMPLES_INPUT_WIN32
-		MyGUI::ResourceManager::getInstance().load("Pointers_W32.xml");
+		getGUI()->load("Pointers_W32.xml");
 #elif MYGUI_SAMPLES_INPUT_WIN32_OIS
-		MyGUI::ResourceManager::getInstance().load("Pointers_W32.xml");
+		getGUI()->load("Pointers_W32.xml");
 #endif
 
 		mPointerContextManager = new PointerContextManager(this);
@@ -63,7 +64,7 @@ namespace demo
 		mFriendPanel = new FriendPanel();
 		mControlPanel = new ControlPanel(mPointerContextManager);
 
-		MyGUI::IntSize size = MyGUI::RenderManager::getInstance().getViewSize();
+		MyGUI::IntSize size = getGUI()->getViewSize();
 		setMousePosition(size.width / 2, size.height / 2);
 		updateCursorPosition();
 
@@ -115,7 +116,7 @@ namespace demo
 		else
 		{
 			// ввод мыши находить вне гу€
-			if (!MyGUI::InputManager::getInstance().injectMouseMove(_absx, _absy, _absz))
+			if (!getGUI()->injectMouseMove(_absx, _absy, _absz))
 			{
 				// пикаем сцену
 				std::string pointer = getCursorFromScene(_absx, _absy);
@@ -129,7 +130,7 @@ namespace demo
 		if (!getGUI())
 			return;
 
-		if (!MyGUI::InputManager::getInstance().injectMousePress(_absx, _absy, _id))
+		if (!getGUI()->injectMousePress(_absx, _absy, _id))
 		{
 			// вращаем сцену только когда не над гуем
 			if (_id == MyGUI::MouseButton::Right)
@@ -153,7 +154,7 @@ namespace demo
 			setPointerVisible(true);
 		}
 
-		if (!MyGUI::InputManager::getInstance().injectMouseRelease(_absx, _absy, _id))
+		if (!getGUI()->injectMouseRelease(_absx, _absy, _id))
 		{
 		}
 	}
@@ -174,7 +175,7 @@ namespace demo
 	void DemoKeeper::updateCamera(int _x, int _y)
 	{
 #ifdef MYGUI_OGRE_PLATFORM
-		gAngleH += (float)_x * -0.1f;
+		gAngleH += (float)_x * -0.1;
 
 		Ogre::Quaternion quatH(Ogre::Radian(Ogre::Degree(gAngleH)), Ogre::Vector3::UNIT_Y);
 		Ogre::Quaternion quatV(Ogre::Radian(Ogre::Degree(gAngleV)), Ogre::Vector3::UNIT_X);
@@ -215,7 +216,7 @@ namespace demo
 
 		gRaySceneQuery = getSceneManager()->createRayQuery(Ogre::Ray());
 #else
-		MyGUI::ResourceManager::getInstance().load("Wallpaper0.layout");
+		getGUI()->load("Wallpaper0.layout");
 #endif
 	}
 
@@ -229,7 +230,7 @@ namespace demo
 	std::string DemoKeeper::getCursorFromScene(int _x, int _y)
 	{
 #ifdef MYGUI_OGRE_PLATFORM
-		MyGUI::IntSize size = MyGUI::RenderManager::getInstance().getViewSize();
+		MyGUI::IntSize size = getGUI()->getViewSize();
 		Ogre::Ray ray = getCamera()->getCameraToViewportRay(
 			_x / float(size.width),
 			_y / float(size.height));

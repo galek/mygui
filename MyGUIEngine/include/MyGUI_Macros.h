@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -22,30 +23,17 @@
 #ifndef __MYGUI_MACROS_H__
 #define __MYGUI_MACROS_H__
 
-#ifdef max
-#undef max
-#endif
-
-#ifdef min
-#undef min
-#endif
-
-#include <limits>
-#include <stddef.h>
-
 namespace MyGUI
 {
 
-	const size_t ITEM_NONE = std::numeric_limits<size_t>::max();
-	const int DEFAULT = -1;
+	const size_t ITEM_NONE = ~(size_t)0;
+	const int DEFAULT ((int)-1);
 	const float ALPHA_MAX = 1.0f;
 	const float ALPHA_MIN = 0.0f;
 
 	//FIXME заменить на шаблоны
 	#define MYGUI_FLAG_NONE  0
 	#define MYGUI_FLAG(num)  (1<<(num))
-
-	const int MAX_COORD = std::numeric_limits<int>::max();
 
 } // namespace MyGUI
 

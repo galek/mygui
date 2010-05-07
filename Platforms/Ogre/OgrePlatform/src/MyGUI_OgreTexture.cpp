@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 
 #include <cstring>
@@ -59,7 +60,7 @@ namespace MyGUI
 	{
 		if (mTmpData.data != nullptr)
 		{
-			delete[] (uint8_t*)mTmpData.data;
+			delete[] (uint8*)mTmpData.data;
 			mTmpData.data = nullptr;
 		}
 
@@ -78,12 +79,12 @@ namespace MyGUI
 
 	int OgreTexture::getWidth()
 	{
-		return (int)mTexture->getWidth();
+		return mTexture->getWidth();
 	}
 
 	int OgreTexture::getHeight()
 	{
-		return (int)mTexture->getHeight();
+		return mTexture->getHeight();
 	}
 
 	void* OgreTexture::lock(TextureUsage _access)
@@ -98,12 +99,12 @@ namespace MyGUI
 		// для чтения копируем в пиксель бокс
 		if (mTmpData.data != nullptr)
 		{
-			delete[] (uint8_t*)mTmpData.data;
+			delete[] (uint8*)mTmpData.data;
 			mTmpData.data = nullptr;
 		}
 
 		mTmpData = Ogre::PixelBox(mTexture->getWidth(), mTexture->getHeight(), mTexture->getDepth(), mTexture->getFormat());
-		mTmpData.data = new uint8_t[mTexture->getBuffer()->getSizeInBytes()];
+		mTmpData.data = new uint8[mTexture->getBuffer()->getSizeInBytes()];
 
 		mTexture->getBuffer()->blitToMemory(mTmpData);
 
@@ -118,7 +119,7 @@ namespace MyGUI
 		}
 		else if (mTmpData.data != nullptr)
 		{
-			delete[] (uint8_t*)mTmpData.data;
+			delete[] (uint8*)mTmpData.data;
 			mTmpData.data = nullptr;
 		}
 	}

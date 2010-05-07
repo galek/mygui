@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2009
+	@module
 */
 
 #ifndef __MYGUI_OGRE_RTTEXTURE_H__

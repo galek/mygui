@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		01/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -32,7 +33,7 @@
 namespace MyGUI
 {
 
-	template <> const char* Singleton<ControllerManager>::INSTANCE_TYPE_NAME("ControllerManager");
+	MYGUI_INSTANCE_IMPLEMENT( ControllerManager )
 
 	void ControllerManager::initialise()
 	{

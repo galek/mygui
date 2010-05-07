@@ -4,8 +4,7 @@
 #include "MyGUI.h"
 //#include <Ogre.h>
 
-typedef std::pair<std::string, std::string> PairString;
-typedef std::vector<PairString> VectorStringPairs;
+typedef std::vector<std::pair<std::string, std::string> > StringPairs;
 
 const std::string DEFAULT_EDITOR_LAYER = "LayoutEditor_Widgets";
 const std::string DEFAULT_LAYER = "Back";
@@ -32,8 +31,8 @@ struct WidgetContainer
 
 	MyGUI::Widget* widget;
 	std::vector<WidgetContainer*> childContainers;
-	VectorStringPairs mProperty;
-	VectorStringPairs mUserString;
+	StringPairs mProperty;
+	StringPairs mUserString;
 	std::vector<ControllerInfo*> mController;
 	std::string type;
 	std::string skin;
@@ -45,7 +44,7 @@ struct WidgetContainer
 	{
 		if (relative_mode)
 		{
-			MyGUI::FloatCoord coord = MyGUI::CoordConverter::convertToRelative(widget->getCoord(), widget->getParentSize());
+			MyGUI::FloatCoord coord = MyGUI::CoordConverter::convertToRelative(widget->getCoord(), widget->getCroppedParent() == nullptr ? MyGUI::Gui::getInstance().getViewSize() : widget->getCroppedParent()->getSize());
 			std::ostringstream stream;
 			if (_percent) stream << coord.left*100 << " " << coord.top*100 << " " << coord.width*100 << " " << coord.height*100;
 			else stream << coord.left << " " << coord.top << " " << coord.width << " " << coord.height;

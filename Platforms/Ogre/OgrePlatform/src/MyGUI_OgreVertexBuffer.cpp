@@ -2,11 +2,12 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 
 #include "MyGUI_OgreVertexBuffer.h"
 
-#include <OgreHardwareVertexBuffer.h>
+#include "Ogre.h"
 
 #include "MyGUI_LastHeader.h"
 

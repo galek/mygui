@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,13 +24,15 @@
 #define __MYGUI_SUB_WIDGET_MANAGER_H__
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 
 namespace MyGUI
 {
 
-	class MYGUI_EXPORT SubWidgetManager : public MyGUI::Singleton<SubWidgetManager>
+	class MYGUI_EXPORT SubWidgetManager
 	{
+		MYGUI_INSTANCE_HEADER( SubWidgetManager )
+
 	public:
 		void initialise();
 		void shutdown();

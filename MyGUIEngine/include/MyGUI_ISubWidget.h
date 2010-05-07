@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -43,7 +44,6 @@ namespace MyGUI
 		MYGUI_RTTI_DERIVED( ISubWidget )
 
 	public:
-		ISubWidget() : mVisible(true) { }
 		virtual ~ISubWidget() { }
 
 		virtual void createDrawItem(ITexture* _texture, ILayerNode* _node) = 0;
@@ -55,15 +55,6 @@ namespace MyGUI
 
 		virtual void doRender() = 0;
 
-		virtual void _setAlign(const IntSize& _oldsize, bool _update) { }
-
-		/** Hide or show */
-		virtual void setVisible(bool _value) { mVisible = _value; }
-		/** Return true if visible */
-		bool isVisible() const { return mVisible; }
-
-	protected:
-		bool mVisible;
 	};
 
 } // namespace MyGUI

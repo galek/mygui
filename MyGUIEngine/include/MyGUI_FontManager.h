@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -25,41 +26,30 @@
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_Enumerator.h"
 #include "MyGUI_IFont.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_XmlDocument.h"
 #include "MyGUI_ResourceManager.h"
 
 namespace MyGUI
 {
 
-	class MYGUI_EXPORT FontManager : public MyGUI::Singleton<FontManager>
+	class MYGUI_EXPORT FontManager
 	{
+		MYGUI_INSTANCE_HEADER( FontManager )
+
 	public:
 		void initialise();
 		void shutdown();
 
-		/** Get default font name.
-			Default skin also used when creating widget with skin that doesn't exist.
-		*/
+		/** Load additional MyGUI *_font.xml file */
+		bool load(const std::string& _file);
+		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
+
 		const std::string& getDefaultFont() const { return mDefaultName; }
-		/** Get default font name.
-			Default skin also used when creating widget with skin that doesn't exist.
-		*/
 		void setDefaultFont(const std::string& _value);
 
 		/** Get font resource */
 		IFont* getByName(const std::string& _name) const;
-
-	/*obsolete:*/
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-		MYGUI_OBSOLETE("use : bool ResourceManager::load(const std::string& _file)")
-		bool load(const std::string& _file);
-
-#endif // MYGUI_DONT_USE_OBSOLETE
-
-	private:
-		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
 
 	private:
 		std::string mDefaultName;

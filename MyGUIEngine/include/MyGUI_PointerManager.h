@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,7 +24,7 @@
 #define __MYGUI_POINTER_MANAGER_H__
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_IUnlinkWidget.h"
 #include "MyGUI_IWidgetCreator.h"
 #include "MyGUI_StaticImage.h"
@@ -34,16 +35,20 @@ namespace MyGUI
 
 	class MYGUI_EXPORT PointerManager :
 		public IUnlinkWidget,
-		public IWidgetCreator,
-		public MyGUI::Singleton<PointerManager>
+		public IWidgetCreator
 	{
-	public:
-		PointerManager();
+		MYGUI_INSTANCE_HEADER( PointerManager )
 
+	public:
 		void initialise();
 		void shutdown();
 
 	public:
+		/** Load additional MyGUI *_pointer.xml file */
+		bool load(const std::string& _file);
+
+		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
+
 		/** Show or hide mouse pointer */
 		void setVisible(bool _visible);
 		/** Is mouse pointer visible */
@@ -61,9 +66,7 @@ namespace MyGUI
 		/** Set default pointer */
 		void setDeafultPointer(const std::string& _value);
 
-		/** Get layer name where pointer rendered */
 		const std::string& getLayerName() { return mLayerName; }
-		/** Set layer where pointer rendered */
 		void setLayerName(const std::string& _value);
 
 		/** Get pointer resource */
@@ -86,13 +89,10 @@ namespace MyGUI
 		void hide() { setVisible(false); }
 		MYGUI_OBSOLETE("use : bool PointerManager::isVisible()")
 		bool isShow() { return isVisible(); }
-		MYGUI_OBSOLETE("use : bool ResourceManager::load(const std::string& _file)")
-		bool load(const std::string& _file);
 
 #endif // MYGUI_DONT_USE_OBSOLETE
 
 	private:
-		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
 		void _unlinkWidget(Widget* _widget);
 
 		// создает виджет

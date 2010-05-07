@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		09/2008
+	@module
 */
 
 #include "precompiled.h"
@@ -193,7 +194,7 @@ void PropertiesPanelView::notifyRectangleKeyPressed(MyGUI::Widget* _sender, MyGU
 	if (MyGUI::KeyCode::Tab == _key)
 	{
 		if ((nullptr != current_widget) && (nullptr != current_widget->getParent()) && (current_widget->getParent()->getTypeName() == "Tab")) update(current_widget->getParent());
-		if (current_widget && current_widget->getTypeName() == "Tab")
+		if (current_widget->getTypeName() == "Tab")
 		{
 			MyGUI::Tab* tab = current_widget->castType<MyGUI::Tab>();
 			size_t sheet = tab->getIndexSelected();
@@ -543,7 +544,7 @@ void PropertiesPanelView::notifyApplyProperties(MyGUI::Widget* _sender, bool _fo
 		else
 		{
 			std::string mess = MyGUI::utility::toString("Skin '", widgetContainer->skin, "' not found. This value will be saved.");
-			GroupMessage::getInstance().addMessage(mess, MyGUI::LogLevel::Error);
+			GroupMessage::getInstance().addMessage(mess, MyGUI::LogManager::Error);
 		}
 		return;
 	}
@@ -559,7 +560,7 @@ void PropertiesPanelView::notifyApplyProperties(MyGUI::Widget* _sender, bool _fo
 			float_coord.top = float_coord.top/100;
 			float_coord.width = float_coord.width/100;
 			float_coord.height = float_coord.height/100;
-			MyGUI::IntCoord coord = MyGUI::CoordConverter::convertFromRelative(float_coord, current_widget->getParentSize());
+			MyGUI::IntCoord coord = MyGUI::CoordConverter::convertFromRelative(float_coord, current_widget->getCroppedParent() == nullptr ? MyGUI::Gui::getInstance().getViewSize() : current_widget->getCroppedParent()->getSize());
 			current_widget->setCoord(coord);
 			current_widget_rectangle->setCoord(current_widget->getAbsoluteCoord());
 			return;
@@ -608,7 +609,7 @@ void PropertiesPanelView::notifyApplyProperties(MyGUI::Widget* _sender, bool _fo
 	}
 
 	// если такое св-во было, то заменим (или удалим если стерли) значение
-	for (VectorStringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
+	for (StringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
 	{
 		if (iterProperty->first == action)
 		{

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		07/2008
+	@module
 */
 #ifndef __ITEM_BOXV_H__
 #define __ITEM_BOXV_H__

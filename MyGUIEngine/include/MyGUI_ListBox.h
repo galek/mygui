@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -119,9 +120,10 @@ namespace MyGUI
 
 	/*internal:*/
 		virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-		virtual void _shutdown();
 
 	protected:
+		virtual ~ListBox();
+
 		void baseChangeWidgetSkin(ResourceSkin* _info);
 
 	private:

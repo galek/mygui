@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -29,7 +30,8 @@ namespace MyGUI
 
 	RenderManager* RenderManager::msInstance = 0;
 
-	RenderManager::RenderManager()
+	RenderManager::RenderManager() :
+		mIsInitialise(false)
 	{
 		MYGUI_ASSERT(0 == msInstance, "instance " << INSTANCE_TYPE_NAME << " is exsist");
 		msInstance = this;

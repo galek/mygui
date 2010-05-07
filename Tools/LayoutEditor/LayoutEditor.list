@@ -21,7 +21,6 @@ set (HEADER_FILES
   OpenSaveFileDialog.h
   Parse.h
   GroupMessage.h
-  CodeGenerator.h
 )
 set (SOURCE_FILES
   EditorState.cpp
@@ -43,7 +42,6 @@ set (SOURCE_FILES
   OpenSaveFileDialog.cpp
   Parse.cpp
   GroupMessage.cpp
-  CodeGenerator.cpp
 )
 SOURCE_GROUP("Source Files" FILES
   EditorState.cpp
@@ -105,9 +103,7 @@ SOURCE_GROUP("GroupedMessage" FILES
   GroupMessage.h
   GroupMessage.cpp
 )
-SOURCE_GROUP("CodeGenerator" FILES
-  CodeGenerator.h
-  CodeGenerator.cpp
+SOURCE_GROUP("Base" FILES
 )
 SOURCE_GROUP("" FILES
 )

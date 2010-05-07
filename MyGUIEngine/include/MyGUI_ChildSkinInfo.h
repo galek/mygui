@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2007
+	@module
 */
 /*
 	This file is part of MyGUI.

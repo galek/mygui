@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 #ifndef __UNITTEST_LIST_H__
 #define __UNITTEST_LIST_H__
@@ -42,7 +43,7 @@ namespace unittest
 				assert(*original_list->getItemDataAt<size_t>(pos) == *mirror_list->getItemDataAt<size_t>(pos));
 			}
 
-			original_list->_checkAlign("UnitTest_List::check");
+			original_list->_checkAlign();
 		}
 
 		void Begin()

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -21,6 +22,7 @@
 */
 #include "MyGUI_Precompiled.h"
 #include "MyGUI_SkinManager.h"
+#include "MyGUI_LanguageManager.h"
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_XmlDocument.h"
 #include "MyGUI_SubWidgetManager.h"
@@ -36,7 +38,7 @@ namespace MyGUI
 	const std::string XML_TYPE_RESOURCE("Resource");
 	const std::string RESOURCE_DEFAULT_NAME("Default");
 
-	template <> const char* Singleton<SkinManager>::INSTANCE_TYPE_NAME("SkinManager");
+	MYGUI_INSTANCE_IMPLEMENT( SkinManager )
 
 	void SkinManager::initialise()
 	{
@@ -63,6 +65,11 @@ namespace MyGUI
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully shutdown");
 		mIsInitialise = false;
+	}
+
+	bool SkinManager::load(const std::string& _file)
+	{
+		return ResourceManager::getInstance()._loadImplement(_file, true, XML_TYPE, INSTANCE_TYPE_NAME);
 	}
 
 	void SkinManager::_load(xml::ElementPtr _node, const std::string& _file, Version _version)
@@ -94,7 +101,7 @@ namespace MyGUI
 		newnode->addAttribute("type", ResourceSkin::getClassTypeName());
 		newnode->addAttribute("name", _value);
 
-		ResourceManager::getInstance().loadFromXmlNode(root, "", Version());
+		ResourceManager::getInstance()._load(root, "", Version());
 	}
 
 	ResourceSkin* SkinManager::getByName(const std::string& _name) const
@@ -106,10 +113,7 @@ namespace MyGUI
 		if (result == nullptr)
 		{
 			result = ResourceManager::getInstance().getByName(mDefaultName, false);
-			if (!_name.empty() && _name != RESOURCE_DEFAULT_NAME)
-			{
-				MYGUI_LOG(Error, "Skin '" << _name << "' not found. Replaced with default skin.");
-			}
+			MYGUI_LOG(Error, "Skin '" << _name << "' not found. Replaced with default skin.");
 		}
 
 		return result ? result->castType<ResourceSkin>(false) : nullptr;
@@ -124,14 +128,5 @@ namespace MyGUI
 	{
 		mDefaultName = _value;
 	}
-
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-	bool SkinManager::load(const std::string& _file)
-	{
-		return ResourceManager::getInstance().load(_file);
-	}
-
-#endif // MYGUI_DONT_USE_OBSOLETE
 
 } // namespace MyGUI

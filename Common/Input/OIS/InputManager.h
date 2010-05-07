@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2009
+	@module
 */
 
 #ifndef __INPUT_MANAGER_H__

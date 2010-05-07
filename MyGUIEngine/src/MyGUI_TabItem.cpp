@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		01/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -37,11 +38,9 @@ namespace MyGUI
 		mOwner = getParent()->castType<Tab>();
 	}
 
-	void TabItem::_shutdown()
+	TabItem::~TabItem()
 	{
 		mOwner->_notifyDeleteItem(this);
-
-		Base::_shutdown();
 	}
 
 	void TabItem::setSelected(bool _value)

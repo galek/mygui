@@ -2,6 +2,7 @@
 	@file
 	@author		Evmenov Georgiy
 	@date		03/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -61,7 +62,7 @@ namespace MyGUI
 		// if our widget or its children have focus
 		bool haveFocus = ((keyFocus != nullptr) || (mouseFocus != nullptr)) || (_widget->isVisible() == false);
 
-		mElapsedTime += haveFocus ? -_time : _time;
+		mElapsedTime += (1 - 2*haveFocus) * _time;
 
 		if (mElapsedTime >= mTime)
 		{
@@ -88,7 +89,11 @@ namespace MyGUI
 				recalculateTime(_widget);
 		}
 
-		const IntSize& view_size = _widget->getParentSize();
+		IntSize view_size;
+		if (_widget->getCroppedParent() == nullptr)
+			view_size = _widget->getLayer()->getSize();
+		else
+			view_size = ((Widget*)_widget->getCroppedParent())->getSize();
 
 		bool nearBorder = false;
 
@@ -138,8 +143,12 @@ namespace MyGUI
 	void ControllerEdgeHide::recalculateTime(Widget* _widget)
 	{
 		float k = 0;
-		const MyGUI::IntCoord& coord = _widget->getCoord();
-		const MyGUI::IntSize& view_size = _widget->getParentSize();
+		const MyGUI::IntCoord& coord = _widget->getCoord();		IntSize view_size;
+		if (_widget->getCroppedParent() == nullptr)
+			view_size = _widget->getLayer()->getSize();
+		else
+			view_size = ((Widget*)_widget->getCroppedParent())->getSize();
+
 
 		// check if widget is near any border and not near opposite borders at same time
 		if ((coord.left <= 0) && !(coord.right() >= view_size.width - 1))

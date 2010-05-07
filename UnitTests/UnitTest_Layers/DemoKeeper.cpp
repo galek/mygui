@@ -2,6 +2,7 @@
 	@file
 	@author     George Evmenov
 	@date       08/2009
+	@module
 */
 #include "DemoKeeper.h"
 #include "Base/Main.h"
@@ -51,7 +52,7 @@ namespace demo
 
 		setupCamera();
 
-		MyGUI::ResourceManager::getInstance().load("rtt_data.xml");
+		getGUI()->load("rtt_data.xml");
 
 		mCommandManager = new CommandManager();
 		mMonitorPanel = new MonitorPanel();
@@ -143,7 +144,7 @@ namespace demo
 		else
 		{
 			// ввод мыши находить вне гу€
-			if (!MyGUI::InputManager::getInstance().injectMouseMove(_absx, _absy, _absz))
+			if (!getGUI()->injectMouseMove(_absx, _absy, _absz))
 			{
 			}
 		}
@@ -154,7 +155,7 @@ namespace demo
 		if (!getGUI())
 			return;
 
-		if (!MyGUI::InputManager::getInstance().injectMousePress(_absx, _absy, _id))
+		if (!getGUI()->injectMousePress(_absx, _absy, _id))
 		{
 			// вращаем сцену только когда не над гуем
 			if (_id == MyGUI::MouseButton::Right)
@@ -178,7 +179,7 @@ namespace demo
 			setPointerVisible(true);
 		}
 
-		if (!MyGUI::InputManager::getInstance().injectMouseRelease(_absx, _absy, _id))
+		if (!getGUI()->injectMouseRelease(_absx, _absy, _id))
 		{
 		}
 	}
@@ -193,7 +194,7 @@ namespace demo
 	void DemoKeeper::updateCamera(int _x, int _y)
 	{
 #ifdef MYGUI_OGRE_PLATFORM
-		gAngleH += (float)_x * -0.1f;
+		gAngleH += (float)_x * -0.1;
 
 		Ogre::Quaternion quatH(Ogre::Radian(Ogre::Degree(gAngleH)), Ogre::Vector3::UNIT_Y);
 		Ogre::Quaternion quatV(Ogre::Radian(Ogre::Degree(gAngleV)), Ogre::Vector3::UNIT_X);

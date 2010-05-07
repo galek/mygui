@@ -2,6 +2,7 @@
     @file
     @author     Albert Semenov
     @date       08/2008
+    @module
 */
 
 #include "DemoKeeper.h"
@@ -26,7 +27,7 @@ namespace demo
 			getGUI()->destroyWidget(lastFlow);
 
 		// Load new, find and update
-		/*MYGUI_ASSERT(*/MyGUI::ResourceManager::getInstance().load(_layoutFileName)/*, "Can't load test lauout!")*/;
+		MYGUI_ASSERT(getGUI()->load(_layoutFileName), "Can't load test lauout!");
 
 		MyGUI::FlowContainer* flow = getGUI()->findWidget<MyGUI::FlowContainer>("Flow");
 
@@ -64,6 +65,10 @@ namespace demo
 	bool DemoKeeper::_testWidget(MyGUI::Widget* _widget, const std::string& _testName)
 	{
 		// I hope
+		MyGUI::FlowContainer* flow = _widget->getParent()->castType<MyGUI::FlowContainer>();
+
+		MyGUI::FlowContainer::WidgetInfo* info = flow->getWidgetInfo(_widget);
+
 		MyGUI::IntCoord reqWidgetCoords = getFlowWidgetCoords(_widget);
 
 		if(reqWidgetCoords == MyGUI::IntCoord())
@@ -227,7 +232,7 @@ namespace demo
 	{
 		// I love this theme :)
 		MyGUI::LanguageManager::getInstance().loadUserTags("core_theme_black_orange_tag.xml");
-		MyGUI::ResourceManager::getInstance().load("core_skin.xml");
+		getGUI()->load("core_skin.xml");
 
 		MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
 		factory.registerFactory<MyGUI::FlowContainer>("Widget");

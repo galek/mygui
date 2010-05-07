@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -53,19 +54,18 @@
 #include "MyGUI_VScroll.h"
 #include "MyGUI_Widget.h"
 #include "MyGUI_Window.h"
-#include "MyGUI_Panel.h"
-#include "MyGUI_StackPanel.h"
-#include "MyGUI_WrapPanel.h"
 
 namespace MyGUI
 {
 
-	template <> const char* Singleton<WidgetManager>::INSTANCE_TYPE_NAME("WidgetManager");
+	MYGUI_INSTANCE_IMPLEMENT( WidgetManager )
 
 	void WidgetManager::initialise()
 	{
 		MYGUI_ASSERT(!mIsInitialise, INSTANCE_TYPE_NAME << " initialised twice");
 		MYGUI_LOG(Info, "* Initialise: " << INSTANCE_TYPE_NAME);
+
+		//registerUnlinker(this);
 
 		FactoryManager& factory = FactoryManager::getInstance();
 
@@ -94,9 +94,6 @@ namespace MyGUI
 		factory.registerFactory<VScroll>("Widget");
 		factory.registerFactory<Widget>("Widget");
 		factory.registerFactory<Window>("Widget");
-		factory.registerFactory<Panel>("Widget");
-		factory.registerFactory<StackPanel>("Widget");
-		factory.registerFactory<WrapPanel>("Widget");
 
 #ifndef MYGUI_DONT_USE_OBSOLETE
 
@@ -104,8 +101,6 @@ namespace MyGUI
 		factory.registerFactory<Sheet>("Widget");
 
 #endif // MYGUI_DONT_USE_OBSOLETE
-
-		Gui::getInstance().eventFrameStart += newDelegate(this, &WidgetManager::notifyEventFrameStart);
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully initialized");
 		mIsInitialise = true;
@@ -116,50 +111,13 @@ namespace MyGUI
 		if (!mIsInitialise) return;
 		MYGUI_LOG(Info, "* Shutdown: " << INSTANCE_TYPE_NAME);
 
-		Gui::getInstance().eventFrameStart -= newDelegate(this, &WidgetManager::notifyEventFrameStart);
-		_deleteDelayWidgets();
+		//unregisterUnlinker(this);
 
 		mFactoryList.clear();
 		mDelegates.clear();
 		mVectorIUnlinkWidget.clear();
 
-		FactoryManager& factory = FactoryManager::getInstance();
-
-		factory.unregisterFactory<Button>("Widget");
-		factory.unregisterFactory<Canvas>("Widget");
-		factory.unregisterFactory<ComboBox>("Widget");
-		factory.unregisterFactory<DDContainer>("Widget");
-		factory.unregisterFactory<Edit>("Widget");
-		factory.unregisterFactory<HScroll>("Widget");
-		factory.unregisterFactory<ItemBox>("Widget");
-		factory.unregisterFactory<List>("Widget");
-		factory.unregisterFactory<ListBox>("Widget");
-		factory.unregisterFactory<ListCtrl>("Widget");
-		factory.unregisterFactory<MenuBar>("Widget");
-		factory.unregisterFactory<MenuCtrl>("Widget");
-		factory.unregisterFactory<MenuItem>("Widget");
-		factory.unregisterFactory<Message>("Widget");
-		factory.unregisterFactory<MultiList>("Widget");
-		factory.unregisterFactory<PopupMenu>("Widget");
-		factory.unregisterFactory<Progress>("Widget");
-		factory.unregisterFactory<ScrollView>("Widget");
-		factory.unregisterFactory<StaticImage>("Widget");
-		factory.unregisterFactory<StaticText>("Widget");
-		factory.unregisterFactory<Tab>("Widget");
-		factory.unregisterFactory<TabItem>("Widget");
-		factory.unregisterFactory<VScroll>("Widget");
-		factory.unregisterFactory<Widget>("Widget");
-		factory.unregisterFactory<Window>("Widget");
-		factory.unregisterFactory<Panel>("Widget");
-		factory.unregisterFactory<StackPanel>("Widget");
-		factory.unregisterFactory<WrapPanel>("Widget");
-
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-		factory.unregisterFactory<RenderBox>("Widget");
-		factory.unregisterFactory<Sheet>("Widget");
-
-#endif // MYGUI_DONT_USE_OBSOLETE
+		FactoryManager::getInstance().unregisterFactory("Widget");
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully shutdown");
 		mIsInitialise = false;
@@ -245,10 +203,10 @@ namespace MyGUI
 			(*iter)->_unlinkWidget(_widget);
 		}
 		// вызывать последним, обнулится
-		//removeWidgetFromUnlink(_widget);
+		removeWidgetFromUnlink(_widget);
 	}
 
-	/*void WidgetManager::addWidgetToUnlink(Widget* _widget)
+	void WidgetManager::addWidgetToUnlink(Widget* _widget)
 	{
 		if (_widget) mUnlinkWidgets.push_back(_widget);
 	}
@@ -265,7 +223,7 @@ namespace MyGUI
 		{
 			_widget = nullptr;
 		}
-	}*/
+	}
 
 	bool WidgetManager::isFactoryExist(const std::string& _type)
 	{
@@ -284,26 +242,6 @@ namespace MyGUI
 		}
 
 		return false;
-	}
-
-	void WidgetManager::_addWidgetToDestroy(Widget* _widget)
-	{
-		mDestroyWidgets.push_back(_widget);
-	}
-
-	void WidgetManager::_deleteDelayWidgets()
-	{
-		if (!mDestroyWidgets.empty())
-		{
-			for (VectorWidgetPtr::iterator entry=mDestroyWidgets.begin(); entry!=mDestroyWidgets.end(); ++entry)
-				delete (*entry);
-			mDestroyWidgets.clear();
-		}
-	}
-
-	void WidgetManager::notifyEventFrameStart(float _time)
-	{
-		_deleteDelayWidgets();
 	}
 
 #ifndef MYGUI_DONT_USE_OBSOLETE
@@ -330,7 +268,7 @@ namespace MyGUI
 		MYGUI_LOG(Info, "* Unregister widget factory '" << _factory->getTypeName() << "'");
 	}
 
-	void WidgetManager::_parse(Widget* _widget, const std::string &_key, const std::string &_value)
+	void WidgetManager::parse(Widget* _widget, const std::string &_key, const std::string &_value)
 	{
 		MapDelegate::iterator iter = mDelegates.find(_key);
 		if (iter == mDelegates.end())

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		02/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -163,35 +164,33 @@ namespace MyGUI
 				return item;
 			}
 
-			// если в конце пустой буфер, то нуна найти последний пустой с краю
-			// либо с нужной текстурой за пустым
-			VectorRenderItem::reverse_iterator iter = mFirstRenderItems.rbegin();
-			if ((*iter)->getNeedVertexCount() == 0)
+			// если последний буфер пустой, то мона не создавать
+			if (mFirstRenderItems.back()->getNeedVertexCount() == 0)
 			{
-				while (true)
+				// пустых может быть сколько угодно, нужен самый первый из пустых
+				for (VectorRenderItem::iterator iter=mFirstRenderItems.begin(); iter!=mFirstRenderItems.end(); ++iter)
 				{
-					VectorRenderItem::reverse_iterator next = iter + 1;
-					if (next != mFirstRenderItems.rend())
+					if ((*iter)->getNeedVertexCount() == 0)
 					{
-						if ((*next)->getNeedVertexCount() == 0)
+						// а теперь внимание, если перед пустым наш, то его и юзаем
+						if (iter != mFirstRenderItems.begin())
 						{
-							iter = next;
-							continue;
+							VectorRenderItem::iterator prev = iter - 1;
+							if ((*prev)->getTexture() == _texture)
+							{
+								return (*prev);
+							}
 						}
-						else if ((*next)->getTexture() == _texture)
-							iter = next;
+						(*iter)->setTexture(_texture);
+						return (*iter);
 					}
-
-					break;
 				}
-
-				(*iter)->setTexture(_texture);
-				return (*iter);
 			}
-			// последний буфер с нужной текстурой
-			else if ((*iter)->getTexture() == _texture)
+
+			// та же текстура
+			if (mFirstRenderItems.back()->getTexture() == _texture)
 			{
-				return *iter;
+				return mFirstRenderItems.back();
 			}
 
 			// создаем новый буфер

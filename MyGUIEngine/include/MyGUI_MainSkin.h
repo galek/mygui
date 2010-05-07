@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		02/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -38,6 +39,7 @@ namespace MyGUI
 
 	/*internal:*/
 		void _setAlign(const IntSize& _oldsize, bool _update);
+		void _setAlign(const IntCoord& _oldsize, bool _update) { SubSkin::_setAlign(_oldsize, _update); }
 	};
 
 } // namespace MyGUI

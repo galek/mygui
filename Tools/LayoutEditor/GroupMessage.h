@@ -1,10 +1,12 @@
 #ifndef __GROUP_MESSAGE__
 #define __GROUP_MESSAGE__
 
-class GroupMessage : public MyGUI::Singleton<GroupMessage>
+class GroupMessage
 {
 public:
-	void addMessage(const MyGUI::UString & _message, MyGUI::LogLevel _type);
+	MYGUI_INSTANCE_HEADER(GroupMessage)
+
+	void addMessage(const MyGUI::UString & _message, MyGUI::LogManager::LogLevel _type);
 	void showMessages();
 private:
 	MyGUI::VectorString mErrorMessages;

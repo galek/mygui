@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,7 +24,7 @@
 #define __MYGUI_SKIN_MANAGER_H__
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_Enumerator.h"
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_XmlDocument.h"
@@ -32,25 +33,23 @@
 namespace MyGUI
 {
 
-	class MYGUI_EXPORT SkinManager : public MyGUI::Singleton<SkinManager>
+	class MYGUI_EXPORT SkinManager
 	{
+		MYGUI_INSTANCE_HEADER( SkinManager )
+
 	public:
 		void initialise();
 		void shutdown();
 
-		/** Get ResourceSkin by name */
+		/** Load additional MyGUI *_skin.xml file */
+		bool load(const std::string& _file);
+		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
+
 		ResourceSkin* getByName(const std::string& _name) const;
 
-		/** Check if skin with specified name exist */
 		bool isExist(const std::string& _name) const;
 
-		/** Get default skin name.
-			Default skin used when creating widget with skin that doesn't exist.
-		*/
 		const std::string getDefaultSkin() const { return mDefaultName; }
-		/** Set default skin name.
-			Default skin used when creating widget with skin that doesn't exist.
-		*/
 		void setDefaultSkin(const std::string& _value);
 
 	/*obsolete:*/
@@ -58,13 +57,10 @@ namespace MyGUI
 
 		MYGUI_OBSOLETE("use : ResourceSkin* SkinManager::getByName(const std::string& _name)")
 		ResourceSkin* getSkin(const std::string& _name) const { return getByName(_name); }
-		MYGUI_OBSOLETE("use : bool ResourceManager::load(const std::string& _file)")
-		bool load(const std::string& _file);
 
 #endif // MYGUI_DONT_USE_OBSOLETE
 
 	private:
-		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
 		void createDefault(const std::string& _value);
 
 	private:

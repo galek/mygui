@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -24,13 +25,12 @@
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_Macros.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_WidgetDefines.h"
 #include "MyGUI_IUnlinkWidget.h"
 #include "MyGUI_WidgetDefines.h"
 #include "MyGUI_XmlDocument.h"
-#include "MyGUI_MouseButton.h"
-#include "MyGUI_KeyCode.h"
+#include "MyGUI_InputDefine.h"
 #include "MyGUI_Timer.h"
 #include "MyGUI_ILayer.h"
 #include "MyGUI_Delegate.h"
@@ -38,13 +38,11 @@
 namespace MyGUI
 {
 
-	class MYGUI_EXPORT InputManager :
-		public IUnlinkWidget,
-		public MyGUI::Singleton<InputManager>
+	class MYGUI_EXPORT InputManager : public IUnlinkWidget
 	{
-	public:
-		InputManager();
+		MYGUI_INSTANCE_HEADER( InputManager )
 
+	public:
 		void initialise();
 		void shutdown();
 
@@ -88,17 +86,16 @@ namespace MyGUI
 		Widget* getMouseFocusWidget() { return mWidgetMouseFocus; }
 		/** Get key focused widget */
 		Widget* getKeyFocusWidget() { return mWidgetKeyFocus; }
-		/** Get position of last left mouse button press.
-			Position calculated on specific layer where mouse was pressed.
-		*/
+		/** Get position of last left mouse button press */
 		const IntPoint& getLastLeftPressed() { return mLastLeftPressed; }
-		/** Get current mouse position on screen */
+		/** Get current mouse position */
 		const IntPoint& getMousePosition() { return mMousePosition; }
 
-		/** Get mouse position on current layer.
-			This position might different from getMousePosition() if mouse is over non-2d layer.
-		*/
 		IntPoint getMousePositionByLayer();
+
+		// тестовый вариант, очистка фокуса мыши
+		/** Drop any mouse focus */
+		void resetMouseFocusWidget();
 
 		// работа с модальными окнами
 		/** Add modal widget - all other widgets inaccessible while modal widget exist */
@@ -114,23 +111,21 @@ namespace MyGUI
 		/** Is shift button pressed */
 		bool isShiftPressed() { return mIsShiftPressed; }
 
-		/** Reset mouse capture.
-			For example when we dragging and application
+		/** Reset mouse capture (for example when we dragging and application
 			lost focus you should call this)
 		*/
 		void resetMouseCaptureWidget() { mIsWidgetMouseCapture = false; }
 
-		/** Unlink widget from input manager. */
 		void unlinkWidget(Widget* _widget) { _unlinkWidget(_widget); }
 
-		/** Event : MultiDelegate. Mouse focus was changed.\n
+		/** Event :\n
 			signature : void method(MyGUI::Widget* _widget)\n
 			@param _widget
 		*/
 		delegates::CMultiDelegate1<Widget*>
 			eventChangeMouseFocus;
 
-		/** Event : MultiDelegate. Key focus was changed.\n
+		/** Event :\n
 			signature : void method(MyGUI::Widget* _widget)\n
 			@param _widget
 		*/
@@ -138,12 +133,6 @@ namespace MyGUI
 			eventChangeKeyFocus;
 
 	private:
-		// тестовый вариант, очистка фокуса мыши
-		/** Drop any mouse focus */
-		void resetMouseFocusWidget();
-
-		void updateMouseFocus();
-
 		// удаляем данный виджет из всех возможных мест
 		void _unlinkWidget(Widget* _widget);
 
@@ -156,22 +145,6 @@ namespace MyGUI
 
 		// сбрасывает клавишу повторения
 		void resetKey();
-
-		void onEventMouseEntry(Widget* _widget, Widget* _old);
-		void onEventMouseLeave(Widget* _widget, Widget* _new);
-		void onEventMouseMove(Widget* _widget, int _x, int _y);
-		void onEventMouseDrag(Widget* _widget, int _x, int _y);
-		void onEventMouseWheel(Widget* _widget, int _delta);
-		void onEventMouseButtonDown(Widget* _widget, int _x, int _y, MouseButton _button);
-		void onEventMouseButtonUp(Widget* _widget, int _x, int _y, MouseButton _button);
-		void onEventMouseButtonClick(Widget* _widget, int _x, int _y, MouseButton _button);
-		void onEventMouseButtonDoubleClick(Widget* _widget, int _x, int _y, MouseButton _button);
-		void onEventGotKeyboardFocus(Widget* _widget, Widget* _old);
-		void onEventLostKeyboardFocus(Widget* _widget, Widget* _new);
-		void onEventKeyButtonDown(Widget* _widget, KeyCode _key, Char _text);
-		void onEventKeyButtonUp(Widget* _widget, KeyCode _key);
-		void onEventRootMouseFocusChanged(Widget* _widget, bool _focus);
-		void onEventRootKeyboardFocusChanged(Widget* _widget, bool _focus);
 
 	private:
 		// виджеты которым принадлежит фокус
@@ -199,6 +172,7 @@ namespace MyGUI
 
 		// список виджетов с модальным режимом
 		VectorWidgetPtr mVectorModalRootWidget;
+
 	};
 
 } // namespace MyGUI

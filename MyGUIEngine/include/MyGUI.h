@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		01/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -48,8 +49,6 @@
 #include "MyGUI_Canvas.h"
 #include "MyGUI_ListCtrl.h"
 #include "MyGUI_ListBox.h"
-#include "MyGUI_Panel.h"
-#include "MyGUI_StackPanel.h"
 
 #include "MyGUI_InputManager.h"
 #include "MyGUI_SubWidgetManager.h"

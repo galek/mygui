@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		08/2008
+	@module
 */
 
 #include "precompiled.h"
@@ -17,16 +18,16 @@ EditorToolTip::EditorToolTip() : BaseLayout("EditorToolTip.layout")
 	lastWidget = nullptr;
 }
 
-/*void EditorToolTip::show(const MyGUI::UString & _text, const MyGUI::IntPoint & _point)
+void EditorToolTip::show(const MyGUI::UString & _text, const MyGUI::IntPoint & _point)
 {
 	if (_text.empty()) return;
 
 	setPosition(_point);
 	mText->setCaption(MyGUI::LanguageManager::getInstance().replaceTags(_text));
 	mMainWidget->setVisible(true);
-}*/
+}
 
-void EditorToolTip::show(MyGUI::Widget* _sender)
+void EditorToolTip::show(MyGUI::Widget* _sender, const MyGUI::IntPoint & _point)
 {
 	static const MyGUI::UString colour_error = MyGUI::LanguageManager::getInstance().getTag("ColourError");
 	static const MyGUI::UString colour_success = MyGUI::LanguageManager::getInstance().getTag("ColourSuccess");
@@ -82,6 +83,7 @@ void EditorToolTip::show(MyGUI::Widget* _sender)
 	lastWidget = mMainWidget->createWidgetT("Widget", skin, MARGIN, MARGIN + LINE_HEIGHT*LINES, width, height, MyGUI::Align::Default);
 	lastWidget->setCaption(skin);
 
+	setPosition(_point);
 	mMainWidget->setVisible(true);
 }
 
@@ -90,25 +92,20 @@ void EditorToolTip::hide()
 	mMainWidget->setVisible(false);
 }
 
-void EditorToolTip::move(const MyGUI::IntPoint & _point)
-{
-	setPosition(_point);
-}
-
 void EditorToolTip::setPosition(const MyGUI::IntPoint & _point)
 {
 	const MyGUI::IntPoint offset(10, 10);
 
 	MyGUI::IntPoint point = _point + offset;
+	MyGUI::Gui * gui = MyGUI::Gui::getInstancePtr();
 
-	const MyGUI::IntSize& size = mMainWidget->getSize();
-	const MyGUI::IntSize& view_size = mMainWidget->getParentSize();
+	const MyGUI::IntSize & size = mMainWidget->getSize();
 
-	if ((point.left + size.width) > view_size.width)
+	if ((point.left + size.width) > gui->getViewSize().width)
 	{
 		point.left -= offset.left + offset.left + size.width;
 	}
-	if ((point.top + size.height) > view_size.height)
+	if ((point.top + size.height) > gui->getViewSize().height)
 	{
 		point.top -= offset.top + offset.top + size.height;
 	}

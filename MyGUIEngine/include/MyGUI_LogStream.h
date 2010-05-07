@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		01/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,32 +24,49 @@
 #define __MYGUI_LOG_STREAM_H__
 
 #include "MyGUI_Prerequest.h"
-#include <string.h>
-#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 namespace MyGUI
 {
 
 	class MYGUI_EXPORT LogStream
 	{
-	public:
-		struct End { };
+		friend class LogManager;
 
 	public:
-		std::string operator << (const End& _endl)
-		{
-			return mStream.str();
-		}
+		struct LogStreamEnd { };
+
+	public:
+		LogStream& operator<<(const LogStreamEnd& _endl);
 
 		template <typename T>
-		inline LogStream& operator << (T _value)
+		inline LogStream& operator<<(T _value)
 		{
-			mStream << _value;
+			if (getSTDOutputEnabled()) std::cout << _value;
+			if (mStream.is_open()) mStream << _value;
 			return *this;
 		}
 
+		const std::string& getFileName() const { return mFileName; }
+
 	private:
-		std::ostringstream mStream;
+		LogStream();
+		~LogStream();
+
+		LogStream(const std::string& _file);
+
+		void start(const std::string& _section, const std::string& _level);
+
+		bool getSTDOutputEnabled();
+
+		void lock() const { }
+		void release() const { }
+
+	private:
+		std::ofstream mStream;
+		std::string mFileName;
 	};
 
 } // namespace MyGUI

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		06/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -25,7 +26,7 @@
 namespace MyGUI
 {
 
-	template <> const char* Singleton<FactoryManager>::INSTANCE_TYPE_NAME("FactoryManager");
+	MYGUI_INSTANCE_IMPLEMENT( FactoryManager )
 
 	void FactoryManager::initialise()
 	{

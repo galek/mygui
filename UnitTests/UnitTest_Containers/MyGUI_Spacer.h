@@ -2,6 +2,7 @@
 	@file
 	@author		Alexander Ptakhin
 	@date		02/2009
+	@module
 */
 #ifndef __MYGUI_SPACER_H__
 #define __MYGUI_SPACER_H__

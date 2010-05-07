@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -33,14 +34,12 @@
 #include "MyGUI_IWidgetCreator.h"
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_IObject.h"
-#include "MyGUI_SizePolicy.h"
-#include "MyGUI_InputElement.h"
 
 namespace MyGUI
 {
 
 	class MYGUI_EXPORT Widget :
-		public InputElement,
+		public IObject,
 		public ICroppedRectangle,
 		public LayerItem,
 		public UserData,
@@ -50,17 +49,11 @@ namespace MyGUI
 	{
 		// для вызова закрытых деструкторов
 		friend class IWidgetCreator;
-		// FIXME времено для рассылки по иерархии енейблед пока нету пропертей хитрых
-		friend class InputElement;
-		friend class WidgetManager;
 
-		MYGUI_RTTI_DERIVED( Widget )
+		MYGUI_RTTI_BASE( Widget )
 
 	public:
 		Widget();
-
-		static void staticConstructor();
-		static void staticDestructor();
 
 		/** Create child widget
 			@param _type widget type
@@ -158,6 +151,9 @@ namespace MyGUI
 		/** See Widget::setRealPosition(const FloatCoord& _coord) */
 		void setRealCoord(float _left, float _top, float _width, float _height) { setRealCoord(FloatCoord(_left, _top, _width, _height)); }
 
+		/** Hide or show widget */
+		virtual void setVisible(bool _value);
+
 		/** Set align */
 		virtual void setAlign(Align _value);
 
@@ -171,36 +167,10 @@ namespace MyGUI
 		/** Get widget opacity */
 		float getAlpha() { return mAlpha; }
 
-		/** Enable or disable inherits alpha mode.\n
-			Inherits alpha mode: when enabled widget alpha it it's own
-			alpha value multiplied by parent's real alpha (that depend
-			on parent's parent and so on).\n
-			When disabled widget's alpha doesn't depend on parent's alpha.
-			So this is used when you need things like semi-transparent
-			window with non-transparent text on it and window's alpha
-			changes.\n
-			Enabled (true) by default.
-		*/
+		/** Enable or disable inherits alpha mode */
 		void setInheritsAlpha(bool _value);
 		/** Get inherits alpha mode flag */
 		bool isInheritsAlpha() { return mInheritsAlpha; }
-
-		// внешние отступы
-		void setMargin(const IntRect& _value);
-		const IntRect& getMargin() { return mMargin; }
-
-		// внутренние отступы
-		void setPadding(const IntRect& _value);
-		const IntRect& getPadding();
-
-		void setMinSize(const IntSize& _value);
-		const IntSize& getMinSize() { return mMinSize; }
-
-		void setMaxSize(const IntSize& _value);
-		const IntSize& getMaxSize() { return mMaxSize; }
-
-		void setSizePolicy(SizePolicy _value);
-		SizePolicy getSizePolicy() { return mSizePolicy; }
 
 		/** Set widget's state */
 		bool setState(const std::string& _value);
@@ -214,10 +184,6 @@ namespace MyGUI
 		/** Get parent widget or nullptr if no parent */
 		Widget* getParent() { return mParent; }
 
-		Widget* getVisualParent() { return static_cast<Widget*>(mCroppedParent); }
-
-		IntSize getParentSize();
-
 		/** Get child widgets Enumerator */
 		EnumeratorWidgetPtr getEnumerator();
 
@@ -230,6 +196,22 @@ namespace MyGUI
 		/** Find widget by name (search recursively through all childs starting from this widget) */
 		Widget* findWidget(const std::string& _name);
 
+		/** Set need key focus flag */
+		void setNeedKeyFocus(bool _value) { mNeedKeyFocus = _value; }
+		/** Is need key focus
+			If disable this widget won't be reacting on keyboard at all.\n
+			Enabled (true) by default.
+		*/
+		bool isNeedKeyFocus() { return mNeedKeyFocus; }
+
+		/** Set need mouse focus flag */
+		void setNeedMouseFocus(bool _value) { mNeedMouseFocus = _value; }
+		/** Is need mouse focus
+			If disable this widget won't be reacting on mouse at all.\n
+			Enabled (true) by default.
+		*/
+		bool isNeedMouseFocus() { return mNeedMouseFocus; }
+
 		/** Set inherits mode flag
 			This mode makes all child widgets pickable even if widget don't
 			need mouse focus (was set setNeedKeyFocus(false) ).\n
@@ -241,6 +223,13 @@ namespace MyGUI
 
 		/** Set picking mask for widget */
 		void setMaskPick(const std::string& _filename);
+
+		/** Enable or disable widget */
+		virtual void setEnabled(bool _value);
+		/** Enable or disable widget without changing widget's state */
+		void setEnabledSilent(bool _value) { mEnabled = _value; }
+		/** Is widget enabled */
+		bool isEnabled() { return mEnabled; }
 
 		/** Set mouse pointer for this widget */
 		void setPointer(const std::string& _value) { mPointer = _value; }
@@ -265,6 +254,11 @@ namespace MyGUI
 		void setNeedToolTip(bool _value);
 		/** Get need tool tip mode flag */
 		bool getNeedToolTip() { return mNeedToolTip; }
+
+		/** Enable or disable tooltip event */
+		void setEnableToolTip(bool _value);
+		/** Get tool tip enabled flag */
+		bool getEnableToolTip() { return mEnableToolTip; }
 
 		/** Detach widget from widgets hierarchy
 			@param _layer Attach to specified layer (if any)
@@ -299,8 +293,8 @@ namespace MyGUI
 
 
 	/*internal:*/
-		// метод для запроса номера айтема
-		virtual size_t _getItemIndex(Widget* _item) { return ITEM_NONE; }
+		// метод для запроса номера айтема и контейнера
+		virtual void _getContainer(Widget*& _container, size_t& _index);
 
 		// дает приоритет виджету при пиккинге
 		void _forcePeek(Widget* _widget);
@@ -326,24 +320,7 @@ namespace MyGUI
 		// устанавливает строку заменив /n на реальный перенос
 		void setCaptionWithNewLine(const std::string& _value);
 		virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-		virtual void _shutdown();
 
-		void invalidateMeasure();
-
-		void updateMeasure(const IntSize& _sizeAvailable);
-
-		const IntSize& getDesiredSize() { return mDesiredSize; }
-
-		int getMarginWidth() { return mMargin.left + mMargin.right; }
-		int getMarginHeight() { return mMargin.top + mMargin.bottom; }
-
-		int getPaddingWidth();
-		int getPaddingHeight();
-
-		void updateArrange(const IntCoord& _coordPlace, const IntSize& _oldsize);
-
-		void _setContainer(Widget* _value) { mContainer = _value; }
-		Widget* _getContainer() { return mContainer; }
 
 	/*obsolete:*/
 #ifndef MYGUI_DONT_USE_OBSOLETE
@@ -352,6 +329,9 @@ namespace MyGUI
 		void setPosition(const IntCoord& _coord) { setCoord(_coord); }
 		MYGUI_OBSOLETE("use : void Widget::setCoord(int _left, int _top, int _width, int _height)")
 		void setPosition(int _left, int _top, int _width, int _height) { setCoord(_left, _top, _width, _height); }
+
+		MYGUI_OBSOLETE("use : void Widget::setEnableToolTip")
+		void enableToolTip(bool _enable) { setEnableToolTip(_enable); }
 
 		MYGUI_OBSOLETE("use : void setInheritsPick(bool _inherits)")
 		void setInheritsPeek(bool _inherits) { setInheritsPick(_inherits); }
@@ -389,11 +369,16 @@ namespace MyGUI
 #endif // MYGUI_DONT_USE_OBSOLETE
 
 	protected:
+		// все создание только через фабрику
+		Widget(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
 		virtual ~Widget();
 
 		virtual void baseChangeWidgetSkin(ResourceSkin* _info);
 
 		void _updateView(); // обновления себя и детей
+
+		void _setAlign(const IntSize& _oldsize, bool _update);
+		void _setAlign(const IntCoord& _oldcoord, bool _update);
 
 		// создает виджет
 		virtual Widget* baseCreateWidget(WidgetStyle _style, const std::string& _type, const std::string& _skin, const IntCoord& _coord, Align _align, const std::string& _layer, const std::string& _name);
@@ -404,6 +389,9 @@ namespace MyGUI
 		// удаляет всех детей
 		virtual void _destroyAllChildWidget();
 
+		// запрашиваем у конейтера айтем по позиции мыши
+		virtual size_t _getContainerIndex(const IntPoint& _point) { return ITEM_NONE; }
+
 		// сброс всех данных контейнера, тултипы и все остальное
 		virtual void _resetContainer(bool _update);
 
@@ -413,18 +401,22 @@ namespace MyGUI
 		virtual ILayerItem * getLayerItemByPoint(int _left, int _top);
 		virtual const IntCoord& getLayerItemCoord() { return mCoord; }
 
-		virtual IntSize overrideMeasure(const IntSize& _sizeAvailable);
-		virtual void overrideArrange(const IntSize& _sizeOld);
-
 	private:
 
-		//void frameEntered(float _frame);
+		void frameEntered(float _frame);
 
 		void initialiseWidgetSkin(ResourceSkin* _info, const IntSize& _size);
 		void shutdownWidgetSkin(bool _deep = false);
 
 		void _updateAlpha();
 		void _updateAbsolutePoint();
+
+		// для внутреннего использования
+		void _setInheritsVisible(bool _value);
+		bool _isInheritsVisible() { return mInheritsVisible; }
+
+		void _setInheritsEnable(bool _value);
+		bool _isInheritsEnable() { return mInheritsEnabled; }
 
 		// показывает скрывает все сабскины
 		void _setSubSkinVisible(bool _visible);
@@ -455,8 +447,13 @@ namespace MyGUI
 		// указатель на первый не текстовой сабскин
 		ISubWidgetRect * mMainSkin;
 
+		// доступен ли на виджет
+		bool mEnabled;
+		bool mInheritsEnabled;
 		// скрыты ли все сабскины при выходе за границу
 		bool mSubSkinsVisible;
+		// для иерархического скрытия
+		bool mInheritsVisible;
 		// прозрачность и флаг наследования альфы нашего оверлея
 		float mAlpha;
 		float mRealAlpha;
@@ -474,6 +471,10 @@ namespace MyGUI
 		// это тот кто нас создал, и кто нас будет удалять
 		IWidgetCreator * mIWidgetCreator;
 
+		// нужен ли виджету ввод с клавы
+		bool mNeedKeyFocus;
+		// нужен ли виджету фокус мыши
+		bool mNeedMouseFocus;
 		bool mInheritsPick;
 
 		// клиентская зона окна
@@ -482,20 +483,19 @@ namespace MyGUI
 		Widget* mWidgetClient;
 
 		bool mNeedToolTip;
+		bool mEnableToolTip;
+		bool mToolTipVisible;
+		float mToolTipCurrentTime;
+		IntPoint mToolTipOldPoint;
+		size_t mToolTipOldIndex;
+		IntPoint m_oldMousePoint;
 
 		// поведение виджета, перекрывающийся дочерний или всплывающий
 		WidgetStyle mWidgetStyle;
 
-	private:
-		IntSize mDesiredSize;
-		IntRect mMargin;
-		IntRect mPadding;
+		FloatCoord mRelativeCoord;
+		bool mDisableUpdateRelative;
 
-		IntSize mMaxSize;
-		IntSize mMinSize;
-		SizePolicy mSizePolicy;
-
-		Widget* mContainer;
 	};
 
 } // namespace MyGUI

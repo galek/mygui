@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -24,6 +25,7 @@
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_XmlDocument.h"
+#include "MyGUI_Guid.h"
 #include "MyGUI_Version.h"
 #include "MyGUI_ISerializable.h"
 #include "MyGUI_ResourceHolder.h"
@@ -47,6 +49,7 @@ namespace MyGUI
 
 	public:
 		const std::string& getResourceName() { return mResourceName; }
+		const Guid& getResourceID() { return mResourceID; }
 
 	protected:
 		IResource() { }
@@ -58,6 +61,7 @@ namespace MyGUI
 	protected:
 		virtual void deserialization(xml::ElementPtr _node, Version _version)
 		{
+			mResourceID = Guid::parse(_node->findAttribute("id"));
 			mResourceName = _node->findAttribute("name");
 		}
 
@@ -65,6 +69,7 @@ namespace MyGUI
 
 	private:
 		std::string mResourceName;
+		Guid mResourceID;
 	};
 
 } // namespace MyGUI

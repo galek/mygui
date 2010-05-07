@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -42,15 +43,7 @@ namespace MyGUI
 	const std::string XML_TYPE_PROPERTY("Property");
 	const std::string RESOURCE_DEFAULT_NAME("Default");
 
-	template <> const char* Singleton<PointerManager>::INSTANCE_TYPE_NAME("PointerManager");
-
-	PointerManager::PointerManager() :
-		mVisible(false),
-		mWidgetOwner(nullptr),
-		mMousePointer(nullptr),
-		mPointer(nullptr)
-	{
-	}
+	MYGUI_INSTANCE_IMPLEMENT( PointerManager )
 
 	void PointerManager::initialise()
 	{
@@ -66,6 +59,9 @@ namespace MyGUI
 		FactoryManager::getInstance().registerFactory<ResourceManualPointer>(XML_TYPE_RESOURCE);
 		FactoryManager::getInstance().registerFactory<ResourceImageSetPointer>(XML_TYPE_RESOURCE);
 
+		mPointer = nullptr;
+		mMousePointer = nullptr;
+		mWidgetOwner = nullptr;
 		mVisible = true;
 
 		mSkinName = "StaticImage";
@@ -89,14 +85,17 @@ namespace MyGUI
 		_destroyAllChildWidget();
 
 		mWidgetOwner = nullptr;
-		mMousePointer = nullptr;
-		mPointer = nullptr;
 
 		WidgetManager::getInstance().unregisterUnlinker(this);
 		ResourceManager::getInstance().unregisterLoadXmlDelegate(XML_TYPE);
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully shutdown");
 		mIsInitialise = false;
+	}
+
+	bool PointerManager::load(const std::string& _file)
+	{
+		return ResourceManager::getInstance()._loadImplement(_file, true, XML_TYPE, INSTANCE_TYPE_NAME);
 	}
 
 	void PointerManager::_load(xml::ElementPtr _node, const std::string& _file, Version _version)
@@ -168,7 +167,7 @@ namespace MyGUI
 						prop->addAttribute("value",  shared_text.empty() ? texture : shared_text);
 					}
 
-					ResourceManager::getInstance().loadFromXmlNode(root, _file, _version);
+					ResourceManager::getInstance()._load(root, _file, _version);
 				}
 
 			}
@@ -352,14 +351,5 @@ namespace MyGUI
 	{
 		setPointer(_name, nullptr);
 	}
-
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-	bool PointerManager::load(const std::string& _file)
-	{
-		return ResourceManager::getInstance().load(_file);
-	}
-
-#endif // MYGUI_DONT_USE_OBSOLETE
 
 } // namespace MyGUI

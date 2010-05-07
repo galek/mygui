@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		04/2009
+	@module
 */
 #include "precompiled.h"
 #include "MetaSolutionWindow.h"
@@ -143,7 +144,7 @@ void MetaSolutionWindow::parseMetaSolution(MyGUI::xml::ElementPtr _node, const s
 
 			metaForm->mDecription = meta_node->findAttribute("desc");
 			metaForm->mLayoutName = meta_node->findAttribute("layout");
-			metaForm->mId = meta_node->findAttribute("id");
+			metaForm->mId = MyGUI::Guid(meta_node->findAttribute("id"));
 
 			// берем детей и крутимся
 			MyGUI::xml::ElementEnumerator metaWidgets = meta_node->getElementEnumerator();
@@ -210,7 +211,7 @@ MetaWidget * MetaSolutionWindow::parseMetaWidget(MyGUI::xml::ElementPtr _node, M
 	while (links.next("MetaLink"))
 	{
 		if (metaWidget->mTarget.empty())
-			metaWidget->mTarget = links->findAttribute("target");
+			metaWidget->mTarget = MyGUI::Guid(links->findAttribute("target"));
 		else
 			MYGUI_LOGGING(LogSection, Warning,
 				"MetaWidget with name '" + metaWidget->mName +
@@ -286,7 +287,7 @@ void MetaSolutionWindow::collapseAll()
 	}
 }
 
-void MetaSolutionWindow::loadTarget(const std::string& _target)
+void MetaSolutionWindow::loadTarget(MyGUI::Guid _target)
 {
 	for (std::vector<MetaForm*>::iterator iterMF = mMetaForms.begin(); iterMF != mMetaForms.end(); ++iterMF)
 	{
@@ -300,7 +301,7 @@ void MetaSolutionWindow::loadTarget(const std::string& _target)
 	}
 }
 
-bool MetaSolutionWindow::findTarget(const std::string& _target)
+bool MetaSolutionWindow::findTarget(MyGUI::Guid _target)
 {
 	for (std::vector<MetaForm*>::iterator iterMF = mMetaForms.begin(); iterMF != mMetaForms.end(); ++iterMF)
 	{
@@ -368,22 +369,15 @@ MyGUI::Widget* MetaSolutionWindow::createWidget(MetaWidget * _widget, MyGUI::Wid
 	EditorWidgets::getInstance().global_counter++;
 
 	while (_parent && !WidgetTypes::getInstance().find(_parent->getTypeName())->parent) _parent = _parent->getParent();
-
-	MyGUI::IntSize parent_size;
 	if (_parent && WidgetTypes::getInstance().find(new_widget_type)->child)
-	{
-		parent_size = _parent->getSize();
 		_parent = _parent->createWidgetT(new_widget_type, new_widget_skin, 0, 0, width, height, MyGUI::Align::Default, tmpname);
-	}
 	else
 	{
-		parent_size = MyGUI::RenderManager::getInstance().getViewSize();
+		MyGUI::IntSize view(MyGUI::Gui::getInstance().getViewSize());
 		_parent = MyGUI::Gui::getInstance().createWidgetT(new_widget_type, new_widget_skin, MyGUI::IntCoord(), MyGUI::Align::Default, DEFAULT_EDITOR_LAYER, tmpname);
-
+		MyGUI::IntSize size(_parent->getSize());
+		_parent->setCoord((view.width-size.width)/2, (view.height-size.height)/2, width, height);
 	}
-	// place in parent center
-	const MyGUI::IntCoord size((parent_size.width - width)/2, (parent_size.height - height)/2, width, height);
-	_parent->setCoord(size);
 	_parent->setCaption(MyGUI::utility::toString("#888888",new_widget_skin));
 
 	WidgetContainer * widgetContainer = new WidgetContainer(new_widget_type, new_widget_skin, _parent, _widget->mName);

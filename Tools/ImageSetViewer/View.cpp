@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 #include "precompiled.h"
 #include "View.h"
@@ -14,9 +15,12 @@ namespace editor
 		assignWidget(mImageView, "view_Image");
 		assignWidget(mMultiList, "multi_List");
 		assignWidget(mEditResourceName, "edit_ResourceName");
+		assignWidget(mEditResourceID, "edit_ResourceID");
 		assignWidget(mEditFileName, "edit_FileName");
 
-		mMultiList->addColumn("name", mMultiList->getClientCoord().width);
+		//const int column_width = 300;
+		mMultiList->addColumn("name", 100/*column_width*/);
+		mMultiList->addColumn("id", 100/*mMultiList->getClientCoord().width - column_width*/);
 		mMultiList->eventListChangePosition = MyGUI::newDelegate(this, &View::notifyListChangePosition);
 
 		initialiseImages();
@@ -38,12 +42,16 @@ namespace editor
 		if (_index == MyGUI::ITEM_NONE) 
 		{
 			mEditResourceName->setCaption("");
+			mEditResourceID->setCaption("");
 			mImageView->setCanvasSize(0, 0);
 		}
 		else
 		{
 			mVectorAnimImages.clear();
 			mEditResourceName->setCaption(_sender->getItemNameAt(_index));
+			std::string id = _sender->getSubItemNameAt(1, _index);
+			mEditResourceID->setCaption(id);
+			//mEditFileName->setCaption(MyGUI::DataManager::getInstance().getDataPath(MyGUI::ResourceManager::getInstance().getFileNameByID(MyGUI::Guid::parse(id))));
 
 			MyGUI::ResourceImageSetPtr resource = *_sender->getItemDataAt<MyGUI::ResourceImageSetPtr>(_index);
 			updateView(resource);
@@ -81,9 +89,19 @@ namespace editor
 			MyGUI::ResourceImageSetPtr image = resource.current().second->castType<MyGUI::ResourceImageSet>(false);
 			if (image != nullptr)
 			{
+				//mComboResource->addItem(image->getResourceName(), image);
 				mMultiList->addItem(image->getResourceName(), image);
+				mMultiList->setSubItemNameAt(1, mMultiList->getItemCount()-1, image->getResourceID().empty() ? "" : image->getResourceID().print());
 			}
 		}
+
+		/*typedef std::vector<MyGUI::ResourceImageSetPtr> Resources;
+		Resources resources = MyGUI::ResourceManager::getInstance().getResources<MyGUI::ResourceImageSet>();
+		for (Resources::iterator iter=resources.begin(); iter!=resources.end(); ++iter)
+		{
+			mMultiList->addItem((*iter)->getResourceName(), (*iter));
+			mMultiList->setSubItemNameAt(1, mMultiList->getItemCount()-1, (*iter)->getResourceID().print());
+		}*/
 	}
 
 	void View::updateView(MyGUI::ResourceImageSetPtr _image)
@@ -170,7 +188,9 @@ namespace editor
 
 	void View::updateColumn()
 	{
-		mMultiList->setColumnWidthAt(0, mMultiList->getClientCoord().width);
+		const int column_width = 300;
+		mMultiList->setColumnWidthAt(0, column_width);
+		mMultiList->setColumnWidthAt(1, mMultiList->getClientCoord().width - column_width);
 	}
 
 	void View::notifyWindowChangeCoord(MyGUI::Window* _sender)

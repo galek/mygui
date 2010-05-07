@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		06/2009
+	@module
 */
 
 #ifndef __MYGUI_OGRE_DIAGNOSTIC_H__
@@ -10,6 +11,7 @@
 #include "MyGUI_Prerequest.h"
 
 #define MYGUI_PLATFORM_LOG_SECTION "Platform"
+#define MYGUI_PLATFORM_LOG_FILENAME "MyGUI.log"
 #define MYGUI_PLATFORM_LOG(level, text) MYGUI_LOGGING(MYGUI_PLATFORM_LOG_SECTION, level, text)
 
 #define MYGUI_PLATFORM_EXCEPT(dest) \

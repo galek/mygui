@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -58,10 +59,17 @@ namespace MyGUI
 		FloatPoint mRectTextureLB;
 		FloatPoint mRectTextureRB;
 
-		ColourARGB mRenderColourLT;
-		ColourARGB mRenderColourRT;
-		ColourARGB mRenderColourLB;
-		ColourARGB mRenderColourRB;
+		Colour mColourLT;
+		Colour mColourRT;
+		Colour mColourLB;
+		Colour mColourRB;
+
+		uint32 mRenderColourLT;
+		uint32 mRenderColourRT;
+		uint32 mRenderColourLB;
+		uint32 mRenderColourRB;
+
+		VertexColourType mVertexFormat;
 	};
 
 } // namespace MyGUI

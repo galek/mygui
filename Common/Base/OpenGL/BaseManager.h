@@ -18,7 +18,6 @@
 
 #if MYGUI_PLATFORM == MYGUI_PLATFORM_WIN32
 #	include <windows.h>
-#	include <winuser.h>
 #endif
 
 namespace base
@@ -47,7 +46,6 @@ namespace base
 		void setResourceFilename(const std::string& _flename) { mResourceFileName = _flename; }
 		void addResourceLocation(const std::string& _name, bool _recursive = false);
 		diagnostic::StatisticInfo * getStatisticInfo() { return mInfo; }
-		diagnostic::InputFocusInfo* getFocusInput() { return mFocusInfo; }
 
 	/*internal:*/
 		void _windowResized();

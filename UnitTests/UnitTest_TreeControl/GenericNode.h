@@ -2,6 +2,7 @@
 	@file
 	@author     Pavel Turin
 	@date       08/2009
+	@module
 */
 #ifndef __GENERIC_NODE_H__
 #define __GENERIC_NODE_H__
@@ -48,9 +49,9 @@ namespace MyGUI
 
     template<class NODE, class OWNER>
     GenericNode<NODE, OWNER>::GenericNode(OWNER* pOwner) :
+        mpOwner(pOwner),
         mpParent(nullptr),
-        mstrText("[ROOT]"),
-        mpOwner(pOwner)
+        mstrText("[ROOT]")
     {
         MYGUI_DEBUG_ASSERT(mpOwner, "GenericNode<NODE, OWNER>::GenericNode pOwner is nullptr");
     }

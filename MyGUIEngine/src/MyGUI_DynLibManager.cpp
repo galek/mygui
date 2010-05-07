@@ -2,6 +2,7 @@
 	@file
 	@author		Denis Koronchik
 	@date		09/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -21,20 +22,16 @@
 */
 #include "MyGUI_Precompiled.h"
 #include "MyGUI_DynLibManager.h"
-#include "MyGUI_WidgetManager.h"
-#include "MyGUI_Gui.h"
 
 namespace MyGUI
 {
 
-	template <> const char* Singleton<DynLibManager>::INSTANCE_TYPE_NAME("DynLibManager");
+	MYGUI_INSTANCE_IMPLEMENT( DynLibManager )
 
 	void DynLibManager::initialise()
 	{
 		MYGUI_ASSERT(!mIsInitialise, INSTANCE_TYPE_NAME << " initialised twice");
 		MYGUI_LOG(Info, "* Initialise: " << INSTANCE_TYPE_NAME);
-
-		Gui::getInstance().eventFrameStart += newDelegate(this, &DynLibManager::notifyEventFrameStart);
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully initialized");
 		mIsInitialise = true;
@@ -45,10 +42,17 @@ namespace MyGUI
 		if (!mIsInitialise) return;
 		MYGUI_LOG(Info, "* Shutdown: " << INSTANCE_TYPE_NAME);
 
-		unloadAll();
+		StringDynLibMap::iterator it;
 
-		Gui::getInstance().eventFrameStart -= newDelegate(this, &DynLibManager::notifyEventFrameStart);
-		_unloadDelayDynLibs();
+		// unload and delete resources
+		for (it = mLibsMap.begin(); it != mLibsMap.end(); ++it)
+		{
+			it->second->unload();
+			delete it->second;
+		}
+
+		// Empty the list
+		mLibsMap.clear();
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully shutdown");
 		mIsInitialise = false;
@@ -81,40 +85,7 @@ namespace MyGUI
 		if (it != mLibsMap.end())
 			mLibsMap.erase(it);
 
-		mDelayDynLib.push_back(library);
+		library->unload();
+		delete library;
 	}
-
-	void DynLibManager::unloadAll()
-	{
-		// unload and delete resources
-		for (StringDynLibMap::iterator it = mLibsMap.begin(); it != mLibsMap.end(); ++it)
-		{
-			mDelayDynLib.push_back(it->second);
-		}
-		// Empty the list
-		mLibsMap.clear();
-	}
-
-	void DynLibManager::notifyEventFrameStart(float _time)
-	{
-		_unloadDelayDynLibs();
-	}
-
-	void DynLibManager::_unloadDelayDynLibs()
-	{
-		if (!mDelayDynLib.empty())
-		{
-			WidgetManager* manager = WidgetManager::getInstancePtr();
-			if (manager != nullptr)
-				manager->_deleteDelayWidgets();
-
-			for (VectorDynLib::iterator entry=mDelayDynLib.begin(); entry!=mDelayDynLib.end(); ++entry)
-			{
-				(*entry)->unload();
-				delete (*entry);
-			}
-			mDelayDynLib.clear();
-		}
-	}
-
 }

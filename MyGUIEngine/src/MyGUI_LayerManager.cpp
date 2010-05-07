@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		02/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -35,7 +36,7 @@ namespace MyGUI
 
 	const std::string XML_TYPE("Layer");
 
-	template <> const char* Singleton<LayerManager>::INSTANCE_TYPE_NAME("LayerManager");
+	MYGUI_INSTANCE_IMPLEMENT( LayerManager )
 
 	void LayerManager::initialise()
 	{
@@ -77,6 +78,11 @@ namespace MyGUI
 			destroy(*iter);
 		}
 		mLayerNodes.clear();
+	}
+
+	bool LayerManager::load(const std::string& _file)
+	{
+		return ResourceManager::getInstance()._loadImplement(_file, true, XML_TYPE, INSTANCE_TYPE_NAME);
 	}
 
 	void LayerManager::_load(xml::ElementPtr _node, const std::string& _file, Version _version)
@@ -245,14 +251,5 @@ namespace MyGUI
 		MYGUI_LOG(Info, "---------- Statistic for layers end ----------" << spacer);
 		MYGUI_LOG(Info, spacer);
 	}
-
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-	bool LayerManager::load(const std::string& _file)
-	{
-		return ResourceManager::getInstance().load(_file);
-	}
-
-#endif // MYGUI_DONT_USE_OBSOLETE
 
 } // namespace MyGUI

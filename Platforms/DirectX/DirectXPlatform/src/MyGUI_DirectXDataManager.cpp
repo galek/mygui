@@ -60,7 +60,7 @@ namespace MyGUI
 		}
 	}
 
-	template <> const char* Singleton<DirectXDataManager>::INSTANCE_TYPE_NAME("DirectXDataManager");
+	MYGUI_INSTANCE_IMPLEMENT( DirectXDataManager )
 
 	void DirectXDataManager::initialise()
 	{

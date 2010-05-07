@@ -3,6 +3,7 @@
 	@author		Denis Koronchik
 	@author		Georgiy Evmenov
 	@date		09/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -82,7 +83,7 @@ namespace MyGUI
 		#endif
 	}
 
-	std::string DynLib::dynlibError() const
+	std::string DynLib::dynlibError( void )
 	{
 #if MYGUI_PLATFORM == MYGUI_PLATFORM_WIN32
 		LPVOID lpMsgBuf;

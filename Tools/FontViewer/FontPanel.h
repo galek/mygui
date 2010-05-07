@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 #ifndef __FONT_PANEL_H__
 #define __FONT_PANEL_H__

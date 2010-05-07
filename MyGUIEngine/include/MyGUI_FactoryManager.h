@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		06/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,65 +24,49 @@
 #define __MYGUI_FACTORY_MANAGER_H__
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_IObject.h"
 #include "MyGUI_GenericFactory.h"
 
 namespace MyGUI
 {
 
-	class MYGUI_EXPORT FactoryManager : public MyGUI::Singleton<FactoryManager>
+	class MYGUI_EXPORT FactoryManager
 	{
+		MYGUI_INSTANCE_HEADER( FactoryManager )
+
 	public:
 		typedef delegates::CDelegate1<IObject*&> Delegate;
 
 		void initialise();
 		void shutdown();
 
-		// DESCRIBEME
+		void registerFactory(const std::string& _category, const std::string& _type, Delegate::IDelegate* _delegate);
+		void unregisterFactory(const std::string& _category, const std::string& _type);
+		void unregisterFactory(const std::string& _category);
+
 		bool isFactoryExist(const std::string& _category, const std::string& _type);
 
-		// DESCRIBEME
 		template<typename Type>
 		void registerFactory(const std::string& _category)
 		{
 			registerFactory(_category, Type::getClassTypeName(), GenericFactory<Type>::getFactory());
-			RegisterType::CallStaticConstructor<Type>(0);
 		}
 
-		// DESCRIBEME
 		template<typename Type>
 		void registerFactory(const std::string& _category, const std::string& _type)
 		{
 			registerFactory(_category, _type, GenericFactory<Type>::getFactory());
-			RegisterType::CallStaticConstructor<Type>(0);
 		}
 
-		// DESCRIBEME
 		template<typename Type>
 		void unregisterFactory(const std::string& _category)
 		{
-			RegisterType::CallStaticDestructor<Type>(0);
 			unregisterFactory(_category, Type::getClassTypeName());
 		}
 
-		// DESCRIBEME
-		template<typename Type>
-		void unregisterFactory(const std::string& _category, const std::string& _type)
-		{
-			RegisterType::CallStaticDestructor<Type>(0);
-			unregisterFactory(_category, _type);
-		}
-
-		// DESCRIBEME
 		IObject* createObject(const std::string& _category, const std::string& _type);
-		// DESCRIBEME
 		void destroyObject(IObject* _object);
-
-	private:
-		void registerFactory(const std::string& _category, const std::string& _type, Delegate::IDelegate* _delegate);
-		void unregisterFactory(const std::string& _category, const std::string& _type);
-		void unregisterFactory(const std::string& _category);
 
 	private:
 		typedef std::map<std::string, Delegate> MapFactoryItem;

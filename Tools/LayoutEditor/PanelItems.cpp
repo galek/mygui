@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		09/2008
+	@module
 */
 
 #include "precompiled.h"
@@ -156,7 +157,7 @@ void PanelItems::syncItems(bool _apply, bool _add, std::string _value)
 			else
 			{
 				int index = 0;
-				for (VectorStringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
+				for (StringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
 				{
 					if (iterProperty->first == action)
 					{
@@ -196,7 +197,7 @@ void PanelItems::syncItems(bool _apply, bool _add, std::string _value)
 		}
 		else
 		{
-			for (VectorStringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
+			for (StringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
 			{
 				if (iterProperty->first == action)
 				{
@@ -280,7 +281,7 @@ void PanelItems::notifyUpdateItem(MyGUI::Edit* _widget)
 
 	WidgetContainer * widgetContainer = EditorWidgets::getInstance().find(current_widget);
 	int index = 0;
-	for (VectorStringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
+	for (StringPairs::iterator iterProperty = widgetContainer->mProperty.begin(); iterProperty != widgetContainer->mProperty.end(); ++iterProperty)
 	{
 		if (iterProperty->first == action)
 		{

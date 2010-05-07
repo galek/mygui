@@ -11,6 +11,9 @@
 # Support macro to use a precompiled header
 # Usage:
 #   use_precompiled_header(TARGET HEADER_FILE SRC_FILE)
+#
+# PREC will contain the dependency that needs to be linked
+# to the project.
 ##################################################################
 
 macro(use_precompiled_header TARGET HEADER_FILE SRC_FILE)

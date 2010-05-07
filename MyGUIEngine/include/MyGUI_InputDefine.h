@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		03/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -19,13 +20,44 @@
 	You should have received a copy of the GNU Lesser General Public License
 	along with MyGUI.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef __MYGUI_KEY_CODE_H__
-#define __MYGUI_KEY_CODE_H__
+#ifndef __MYGUI_INPUT_DEFINE_H__
+#define __MYGUI_INPUT_DEFINE_H__
 
 #include "MyGUI_Prerequest.h"
 
 namespace MyGUI
 {
+
+	struct MYGUI_EXPORT MouseButton
+	{
+		enum Enum
+		{
+			Left = 0,
+			Right,
+			Middle,
+
+			Button0 = 0,
+			Button1,
+			Button2,
+			Button3,
+			Button4,
+			Button5,
+			Button6,
+			Button7,
+
+			None = -1
+		};
+
+		MouseButton(Enum _value = None) : value(_value) { }
+
+		friend bool operator == (MouseButton const& a, MouseButton const& b) { return a.value == b.value; }
+		friend bool operator != (MouseButton const& a, MouseButton const& b) { return a.value != b.value; }
+
+		int toValue() const { return (int)value; }
+
+	private:
+		Enum value;
+	};
 
 	struct MYGUI_EXPORT KeyCode
 	{
@@ -192,4 +224,4 @@ namespace MyGUI
 
 } // namespace MyGUI
 
-#endif // __MYGUI_KEY_CODE_H__
+#endif // __MYGUI_INPUT_DEFINE_H__

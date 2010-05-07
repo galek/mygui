@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -31,7 +32,7 @@ namespace MyGUI
 
 	const std::string XML_TYPE("Language");
 
-	template <> const char* Singleton<LanguageManager>::INSTANCE_TYPE_NAME("LanguageManager");
+	MYGUI_INSTANCE_IMPLEMENT( LanguageManager )
 
 	void LanguageManager::initialise()
 	{
@@ -53,6 +54,11 @@ namespace MyGUI
 
 		MYGUI_LOG(Info, INSTANCE_TYPE_NAME << " successfully shutdown");
 		mIsInitialise = false;
+	}
+
+	bool LanguageManager::load(const std::string& _file)
+	{
+		return ResourceManager::getInstance()._loadImplement(_file, true, XML_TYPE, INSTANCE_TYPE_NAME);
 	}
 
 	void LanguageManager::_load(xml::ElementPtr _node, const std::string& _file, Version _version)
@@ -181,7 +187,7 @@ namespace MyGUI
 			if (read.empty()) continue;
 
 			// заголовок утф
-			if ((uint8_t)read[0] == 0xEF && read.size() > 2)
+			if ((uint8)read[0] == 0xEF && read.size() > 2)
 			{
 				read.erase(0, 3);
 			}
@@ -239,49 +245,26 @@ namespace MyGUI
 							size_t start = iter - line.begin();
 							size_t len = (iter2 - line.begin()) - start - 1;
 							const UString& tag = line.substr(start + 1, len);
-							UString replacement;
 
 							bool find = true;
-							// try to find in loaded from resources language strings
 							MapLanguageString::iterator replace = mMapLanguage.find(tag);
-							if (replace != mMapLanguage.end())
+							if (replace == mMapLanguage.end())
 							{
-								replacement = replace->second;
-							}
-							else
-							{
-								// try to find in user language strings
 								replace = mUserMapLanguage.find(tag);
-								if (replace != mUserMapLanguage.end())
-								{
-									find = true;
-									replacement = replace->second;
-								}
-								else
-								{
-									find = false;
-								}
+								find = replace != mUserMapLanguage.end();
 							}
 
-							// try to ask user if event assigned or use #{_tag} instead
 							if (!find)
 							{
-								if (!eventRequestTag.empty())
-								{
-									eventRequestTag(tag, replacement);
-								}
-								else
-								{
-									iter = line.insert(iter, '#') + size_t(len + 2);
-									end = line.end();
-									break;
-								}
+								iter = line.insert(iter, '#') + size_t(len + 2);
+								end = line.end();
+								break;
 							}
 
 							iter = line.erase(iter - size_t(1), iter2 + size_t(1));
 							size_t pos = iter - line.begin();
-							line.insert(pos, replacement);
-							iter = line.begin() + pos + replacement.length();
+							line.insert(pos, replace->second);
+							iter = line.begin() + pos + replace->second.length();
 							end = line.end();
 							if (iter == end) return line;
 							break;
@@ -332,14 +315,5 @@ namespace MyGUI
 	{
 		return loadLanguage(_file, true);
 	}
-
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-	bool LanguageManager::load(const std::string& _file)
-	{
-		return ResourceManager::getInstance().load(_file);
-	}
-
-#endif // MYGUI_DONT_USE_OBSOLETE
 
 } // namespace MyGUI

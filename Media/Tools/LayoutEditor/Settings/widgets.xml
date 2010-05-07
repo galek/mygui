@@ -170,7 +170,7 @@
 		<Parameter key="Progress_Range" value="1 int"/>
 		<Parameter key="Progress_Position" value="1 int"/>
 		<Parameter key="Progress_AutoTrack" value="Bool"/>
-		<Parameter key="Progress_FlowDirection" value="FlowDirection"/>
+		<Parameter key="Progress_StartPoint" value="AlignStartPoint"/>
 	</Widget>
 
 	<Widget name="ScrollView">
@@ -279,12 +279,6 @@
 		<Parameter key="Widget_Enabled" value="Bool"/>
 		<Parameter key="Widget_NeedToolTip" value="Bool"/>
 
-		<Parameter key="Widget_SizePolicy" value="SizePolicy"/>
-		<Parameter key="Widget_Margin" value="4 int"/>
-		<Parameter key="Widget_Padding" value="4 int"/>
-		<Parameter key="Widget_MinSize" value="2 int"/>
-		<Parameter key="Widget_MaxSize" value="2 int"/>
-
 		<_Parameter key="Widget_eventMouseLostFocus" value="String"/>
 		<_Parameter key="Widget_eventMouseSetFocus" value="String"/>
 		<_Parameter key="Widget_eventMouseDrag" value="String"/>
@@ -332,35 +326,6 @@
 
 		<Parameter key="MenuItem_Id" value="String"/>
 		<Parameter key="MenuItem_Type" value="MenuItemType"/>
-	</Widget>
-
-	<Widget name="StackPanel">
-		<Property key="DefaultSkin" value="Panel"/>
-
-		<Property key="Skin" value="Panel" name="StackPanel" group="Panels"/>
-
-		<Property key="Parent" value="true"/>
-		<Property key="Child" value="true"/>
-
-		<Parameter key="StackPanel_Uniform" value="Bool"/>
-		<Parameter key="StackPanel_Spacer" value="1 int"/>
-		<Parameter key="StackPanel_FlowDirection" value="FlowDirection"/>
-	</Widget>
-
-	<Widget name="WrapPanel">
-		<Property key="DefaultSkin" value="Panel"/>
-
-		<Property key="Skin" value="Panel" name="WrapPanel" group="Panels"/>
-
-		<Property key="Parent" value="true"/>
-		<Property key="Child" value="true"/>
-
-		<Parameter key="StackPanel_HorizontalSpacer" value="1 int"/>
-		<Parameter key="StackPanel_VerticalSpacer" value="1 int"/>
-		<Parameter key="StackPanel_ItemWidth" value="1 int"/>
-		<Parameter key="StackPanel_ItemHeight" value="1 int"/>
-		<Parameter key="StackPanel_FlowDirection" value="FlowDirection"/>
-		<Parameter key="StackPanel_InvertWrap" value="Bool"/>
 	</Widget>
 
 </MyGUI>

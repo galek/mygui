@@ -2,6 +2,7 @@
     @file
     @author     Albert Semenov
     @date       08/2008
+    @module
 */
 #include "FadeNodeAnimator.h"
 
@@ -67,9 +68,7 @@ namespace demo
 			{
 				float alpha = pow(mAlpha, mSpeed[index]);
 
-				MyGUI::ColourARGB colour;
-				colour.value = MyGUI::ColourARGB::White;
-				colour.data.alpha = uint8_t(alpha * 255);
+				unsigned int colour = 0xFFFFFF | ((unsigned int)(alpha * 255.0f) << 24);
 
 				_data[index].vertex[MyGUI::QuadData::CornerLT].colour = colour;
 				_data[index].vertex[MyGUI::QuadData::CornerRT].colour = colour;
@@ -85,10 +84,10 @@ namespace demo
 				for (int x = 0; x < getCountX() + 1; ++x)
 				{
 					index = x + y*getCountX();
-					float speed = 1.0f;
+					float speed;
 					if (mFadeType == 1) // random not-squares
 					{
-						speed = (float)mSpeed[index % (getCountX() * getCountY())];
+						speed = mSpeed[index % (getCountX() * getCountY())];
 					}
 					if (mFadeType == 2) // from center
 					{
@@ -104,9 +103,7 @@ namespace demo
 					}
 					float alpha = pow(mAlpha,speed);
 
-					MyGUI::ColourARGB colour;
-					colour.value = MyGUI::ColourARGB::White;
-					colour.data.alpha = uint8_t(alpha * 255);
+					unsigned int colour = 0xFFFFFF | ((unsigned int)(alpha * 255.0f) << 24);
 
 					if ( x < getCountX() && y < getCountY() ) _data[index].vertex[MyGUI::QuadData::CornerLT].colour = colour;
 					if ( x > 0       && y < getCountY() ) _data[index - 1].vertex[MyGUI::QuadData::CornerRT].colour = colour;

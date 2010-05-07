@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -26,6 +27,7 @@
 #include "MyGUI_Widget.h"
 #include "MyGUI_ResourceImageSet.h"
 #include "MyGUI_ImageInfo.h"
+#include "MyGUI_Guid.h"
 
 namespace MyGUI
 {
@@ -166,6 +168,12 @@ namespace MyGUI
 		//------------------------------------------------------------------------------//
 
 		/** Select current items resource used in StaticImage
+			@param _id Resource guid
+			@return false if resource with such guid not exist
+		*/
+		bool setItemResource(const Guid& _id);
+
+		/** Select current items resource used in StaticImage
 			@param _id Resource name
 			@return false if resource with such name not exist
 		*/
@@ -193,12 +201,11 @@ namespace MyGUI
 
 	/*internal:*/
 		virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-		virtual void _shutdown();
 
 	protected:
-		void baseChangeWidgetSkin(ResourceSkin* _info);
+		virtual ~StaticImage();
 
-		virtual IntSize overrideMeasure(const IntSize& _sizeAvailable);
+		void baseChangeWidgetSkin(ResourceSkin* _info);
 
 	private:
 		void initialiseWidgetSkin(ResourceSkin* _info);
@@ -210,7 +217,6 @@ namespace MyGUI
 		void updateSelectIndex(size_t _index);
 
 		void frameAdvise(bool _advise);
-		void setDesiredSize(const IntSize& _size);
 
 	private:
 		// кусок в текстуре наших картинок
@@ -232,7 +238,6 @@ namespace MyGUI
 		std::string mItemName;
 		std::string mItemGroup;
 		std::string mCurrentTextureName;
-		IntSize mNativeImageSize;
 
 	};
 

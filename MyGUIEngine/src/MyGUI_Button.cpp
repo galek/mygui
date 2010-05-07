@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -44,11 +45,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void Button::_shutdown()
+	Button::~Button()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void Button::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -138,14 +137,14 @@ namespace MyGUI
 	{
 		if (mIsStateCheck)
 		{
-			if (!isEnabled()) { if (!_setState("disabled_checked")) _setState("disabled"); }
+			if (!mEnabled) { if (!_setState("disabled_checked")) _setState("disabled"); }
 			else if (mIsMousePressed) { if (!_setState("pushed_checked")) _setState("pushed"); }
 			else if (mIsMouseFocus) { if (!_setState("highlighted_checked")) _setState("pushed"); }
 			else _setState("normal_checked");
 		}
 		else
 		{
-			if (!isEnabled()) _setState("disabled");
+			if (!mEnabled) _setState("disabled");
 			else if (mIsMousePressed) _setState("pushed");
 			else if (mIsMouseFocus) _setState("highlighted");
 			else _setState("normal");
@@ -182,7 +181,7 @@ namespace MyGUI
 	void Button::baseUpdateEnable()
 	{
 		updateButtonState();
-		if (!isEnabled())
+		if (!mEnabled)
 		{
 			mIsMouseFocus = false;
 		}

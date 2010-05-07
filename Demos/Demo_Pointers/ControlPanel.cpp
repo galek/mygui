@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2009
+	@module
 */
 #include "precompiled.h"
 #include "ControlPanel.h"
@@ -14,7 +15,7 @@ namespace demo
 	{
 		initialiseByAttributes(this);
 
-		const MyGUI::IntSize& size = mMainWidget->getParentSize();
+		const MyGUI::IntSize& size = MyGUI::Gui::getInstance().getViewSize();
 		mMainWidget->setPosition(10, size.height - 10 - mMainWidget->getHeight());
 
 		mBusy->eventMouseButtonClick = MyGUI::newDelegate(this, &ControlPanel::notifyMouseButtonClick);

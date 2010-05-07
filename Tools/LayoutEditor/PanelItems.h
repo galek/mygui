@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		09/2008
+	@module
 */
 #ifndef __PANEL_ITEMS_H__
 #define __PANEL_ITEMS_H__

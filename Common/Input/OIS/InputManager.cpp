@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2009
+	@module
 */
 
 #include "precompiled.h"

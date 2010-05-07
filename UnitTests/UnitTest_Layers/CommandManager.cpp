@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2009
+	@module
 */
 
 #include "CommandManager.h"

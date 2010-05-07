@@ -95,11 +95,18 @@ private:
 };
 
 enum { PR_DEFAULT, PR_POSITION, PR_PROPERTIES, PR_KEY_POSITION };
-class UndoManager : public MyGUI::Singleton<UndoManager>
+class UndoManager
 {
 public:
-	UndoManager();
-	~UndoManager();
+	//MYGUI_INSTANCE_HEADER(UndoManager);
+	private:
+		static UndoManager* msInstance;
+		bool mIsInitialise;
+	public: \
+		UndoManager();
+		~UndoManager();
+		static UndoManager& getInstance();
+		static UndoManager* getInstancePtr();
 
 public:
 	void initialise(EditorWidgets * ew);

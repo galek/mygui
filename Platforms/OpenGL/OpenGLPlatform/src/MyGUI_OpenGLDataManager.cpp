@@ -13,7 +13,7 @@
 namespace MyGUI
 {
 
-	template <> const char* Singleton<OpenGLDataManager>::INSTANCE_TYPE_NAME("OpenGLDataManager");
+	MYGUI_INSTANCE_IMPLEMENT(OpenGLDataManager)
 
 	void OpenGLDataManager::initialise()
 	{

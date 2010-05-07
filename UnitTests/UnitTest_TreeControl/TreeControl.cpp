@@ -2,6 +2,7 @@
 	@file
 	@author     Pavel Turin
 	@date       08/2009
+	@module
 */
 
 #include "precompiled.h"
@@ -85,19 +86,26 @@ namespace MyGUI
 
     TreeControl::TreeControl() :
         mpWidgetScroll(nullptr),
+        mnItemHeight(1),
+        mnScrollRange(-1),
         mbScrollAlwaysVisible(true),
         mbHasFocus(false),
         mbInvalidated(false),
-        mbRootVisible(false),
-        mnItemHeight(1),
-        mnScrollRange(-1),
         mnTopIndex(0),
         mnTopOffset(0),
-        mnFocusIndex(ITEM_NONE),
         mpSelection(nullptr),
-        mnExpandedNodes(0)
+        mnFocusIndex(ITEM_NONE),
+        mnExpandedNodes(0),
+        mbRootVisible(false)
     {
         mpRoot = new Node(this);
+    }
+
+    TreeControl::~TreeControl()
+    {
+        shutdownWidgetSkin();
+
+        delete mpRoot;
     }
 
     void TreeControl::_initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name)
@@ -105,20 +113,6 @@ namespace MyGUI
         Base::_initialise(_style, _coord, _align, _info, _parent, _croppedParent, _creator, _name);
 
         initialiseWidgetSkin(_info);
-    }
-
-    void TreeControl::_shutdown()
-    {
-		if (mbInvalidated)
-		{
-			Gui::getInstance().eventFrameStart -= newDelegate(this, &TreeControl::notifyFrameEntered);
-		}
-
-        shutdownWidgetSkin();
-
-        delete mpRoot;
-
-		Base::_shutdown();
     }
 
     void TreeControl::baseChangeWidgetSkin(ResourceSkin* pSkinInformation)
@@ -130,8 +124,7 @@ namespace MyGUI
 
     void TreeControl::initialiseWidgetSkin(ResourceSkin* pSkinInformation)
     {
-		//FIXME
-		setNeedKeyFocus(true);
+        mNeedKeyFocus = true;
 
         for (VectorWidgetPtr::iterator WidgetIterator = mWidgetChildSkin.begin(); WidgetIterator != mWidgetChildSkin.end(); ++WidgetIterator)
         {
@@ -355,11 +348,11 @@ namespace MyGUI
         typedef std::list<PairNodeEnumeration> ListNodeEnumeration;
         ListNodeEnumeration EnumerationStack;
         PairNodeEnumeration Enumeration;
-        VectorNodePtr vectorNodePtr;
+        VectorNodePtr VectorNodePtr;
         if (mbRootVisible)
         {
-            vectorNodePtr.push_back(mpRoot);
-            Enumeration = PairNodeEnumeration(vectorNodePtr.begin(), vectorNodePtr.end());
+            VectorNodePtr.push_back(mpRoot);
+            Enumeration = PairNodeEnumeration(VectorNodePtr.begin(), VectorNodePtr.end());
         }
         else
             Enumeration = PairNodeEnumeration(mpRoot->getChildren().begin(), mpRoot->getChildren().end());

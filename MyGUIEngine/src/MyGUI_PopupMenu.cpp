@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		02/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -37,11 +38,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void PopupMenu::_shutdown()
+	PopupMenu::~PopupMenu()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void PopupMenu::baseChangeWidgetSkin(ResourceSkin* _info)

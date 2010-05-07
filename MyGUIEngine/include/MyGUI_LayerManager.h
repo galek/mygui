@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		02/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,7 +24,7 @@
 #define __MYGUI_LAYER_MANAGER_H__
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_Enumerator.h"
 #include "MyGUI_XmlDocument.h"
 #include "MyGUI_IUnlinkWidget.h"
@@ -34,9 +35,10 @@ namespace MyGUI
 {
 
 	class MYGUI_EXPORT LayerManager :
-		public IUnlinkWidget,
-		public MyGUI::Singleton<LayerManager>
+		public IUnlinkWidget
 	{
+		MYGUI_INSTANCE_HEADER( LayerManager )
+
 	public:
 		typedef std::vector<ILayer*> VectorLayer;
 		typedef Enumerator<VectorLayer> EnumeratorLayer;
@@ -60,33 +62,26 @@ namespace MyGUI
 		*/
 		void upLayerItem(Widget* _item);
 
+		/** Load additional MyGUI *_layer.xml file */
+		bool load(const std::string& _file);
+		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
+
 		/** Check is layer exist */
 		bool isExist(const std::string& _name) const;
 		/** Get layer nodes Enumerator */
 		EnumeratorLayer getEnumerator() { return EnumeratorLayer(mLayerNodes); }
 
-		/** Get layer by name */
 		ILayer* getByName(const std::string& _name, bool _throw = true) const;
 
 		/** Get top visible and enabled widget at specified position */
 		Widget* getWidgetFromPoint(int _left, int _top);
 
-		/** Render all layers to specified target */
 		void renderToTarget(IRenderTarget* _target, bool _update);
 
-		/** Collect and dump statistic about layers and batches into log. */
 		virtual void dumpStatisticToLog();
 
-	/*obsolete:*/
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-		MYGUI_OBSOLETE("use : bool ResourceManager::load(const std::string& _file)")
-		bool load(const std::string& _file);
-
-#endif // MYGUI_DONT_USE_OBSOLETE
-
 	private:
-		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
+		// удаляем данный виджет из всех возможных мест
 		void _unlinkWidget(Widget* _widget);
 
 		void clear();

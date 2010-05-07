@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2009
+	@module
 */
 
 #ifndef __SCENE_OBJECT_H__

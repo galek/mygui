@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		08/2008
+	@module
 */
 #ifndef __PANEL_STATIC_H__
 #define __PANEL_STATIC_H__

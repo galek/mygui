@@ -1,7 +1,8 @@
-/*!
+ /*!
 	@file
 	@author		Albert Semenov
 	@date		11/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -21,6 +22,8 @@
 */
 #include "MyGUI_Precompiled.h"
 #include "MyGUI_MenuItem.h"
+#include "MyGUI_SkinManager.h"
+#include "MyGUI_SubWidgetManager.h"
 
 namespace MyGUI
 {
@@ -49,16 +52,13 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 
 		// нам нуженфокус клавы
-		//FIXME
-		setNeedKeyFocus(true);
+		this->mNeedKeyFocus = true;
 	}
 
-	void MenuItem::_shutdown()
+	MenuItem::~MenuItem()
 	{
 		shutdownWidgetSkin();
 		mOwner->_notifyDeleteItem(this);
-
-		Base::_shutdown();
 	}
 
 	Widget* MenuItem::baseCreateWidget(WidgetStyle _style, const std::string& _type, const std::string& _skin, const IntCoord& _coord, Align _align, const std::string& _layer, const std::string& _name)

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		08/2008
+	@module
 */
 #ifndef __CONSOLE_H__
 #define __CONSOLE_H__
@@ -11,8 +12,8 @@
 #include <limits>
 
 #ifdef max
-#	undef max
-#	undef min
+#    undef max
+#    undef min
 #endif
 
 namespace demo
@@ -102,11 +103,7 @@ namespace demo
 
 		void internalCommand(MyGUI::Widget* _sender, const MyGUI::UString & _key, const MyGUI::UString & _value);
 
-		void notifyCreateWidgetItem(MyGUI::ListCtrl* _sender, MyGUI::Widget* _item);
-		void notifyDrawItem(MyGUI::ListCtrl* _sender, MyGUI::Widget* _item, const MyGUI::IBDrawItemInfo& _info, MyGUI::IntCoord& _coord);
-
 	private:
-		MyGUI::ListCtrl* mListBoxHistory;
 		MyGUI::Edit* mListHistory;
 		MyGUI::ComboBox* mComboCommand;
 		MyGUI::Button* mButtonSubmit;
@@ -122,8 +119,6 @@ namespace demo
 
 		// если текущий текст автодополнен
 		bool mAutocomleted;
-
-		std::vector<MyGUI::UString> mLines;
 
 		static Console * m_instance;
 	};

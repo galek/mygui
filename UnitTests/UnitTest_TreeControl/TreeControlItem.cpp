@@ -2,6 +2,7 @@
 	@file
 	@author     Pavel Turin
 	@date       08/2009
+	@module
 */
 
 #include "precompiled.h"
@@ -23,11 +24,9 @@ namespace MyGUI
         initialiseWidgetSkin(_info);
     }
 
-    void TreeControlItem::_shutdown()
+    TreeControlItem::~TreeControlItem()
     {
         shutdownWidgetSkin();
-
-		Base::_shutdown();
     }
 
     void TreeControlItem::baseChangeWidgetSkin(ResourceSkin* pSkinInformation)

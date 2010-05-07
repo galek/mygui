@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		05/2008
+	@module
 */
 #include "precompiled.h"
 #include "DemoKeeper.h"
@@ -99,15 +100,15 @@ namespace demo
 
 	void DemoKeeper::createScene()
 	{
-		MyGUI::ResourceManager::getInstance().load("Wallpaper0.layout");
-		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().loadLayout("BackHelp.layout");
+		getGUI()->load("Wallpaper0.layout");
+		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().load("BackHelp.layout");
 		root.at(0)->findWidget("Text")->setCaption("You can drag and drop items from one ItemBox to another. Hold mouse over item to see tool tip. Resize windows to see vertical and horizontal ItebBox alignments.");
 
 		// регестрируем тип нашего ресурса
 		MyGUI::FactoryManager::getInstance().registerFactory<ResourceItemInfo>("Resource");
 
-		MyGUI::ResourceManager::getInstance().load("Resources.xml");
-		MyGUI::ResourceManager::getInstance().load("ItemBox_skin.xml");
+		MyGUI::Gui::getInstance().load("Resources.xml");
+		MyGUI::Gui::getInstance().load("ItemBox_skin.xml");
 
 		mToolTip = new ToolTip();
 		mToolTip->hide();
@@ -169,16 +170,11 @@ namespace demo
 	{
 		if (_info.type == MyGUI::ToolTipInfo::Show)
 		{
-			mToolTip->show(_data);
-			mToolTip->move(_info.point);
+			mToolTip->show(_data, _info.point);
 		}
 		else if (_info.type == MyGUI::ToolTipInfo::Hide)
 		{
 			mToolTip->hide();
-		}
-		else if (_info.type == MyGUI::ToolTipInfo::Move)
-		{
-			mToolTip->move(_info.point);
 		}
 	}
 

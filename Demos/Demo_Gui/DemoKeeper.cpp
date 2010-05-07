@@ -2,6 +2,7 @@
     @file
     @author     Albert Semenov
     @date       08/2008
+    @module
 */
 #include "precompiled.h"
 #include "DemoKeeper.h"
@@ -40,7 +41,7 @@ namespace demo
 	void DemoKeeper::createScene()
 	{
 		createDefaultScene();
-		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().loadLayout("BackHelp.layout");
+		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().load("BackHelp.layout");
 		root.at(0)->findWidget("Text")->setCaption("Demonstration of using different widgets and styles (something like Ogre Demo_Gui).");
 
 		mMainPanel = new MainPanel();
@@ -128,7 +129,7 @@ namespace demo
 				const MyGUI::IntSize size(80, 80);
 				MyGUI::Window* window = view->createWidget<MyGUI::Window>(MyGUI::WidgetStyle::Overlapped, "WindowCS", MyGUI::IntCoord(getRand(0, coord.width - size.width), getRand(0, coord.height - size.height), size.width, size.height), MyGUI::Align::Default);
 				window->setCaption("Frame");
-				window->setMinSize(size);
+				window->setMinSize(size.width, size.height);
 			}
 			else if (_index == 1)
 			{

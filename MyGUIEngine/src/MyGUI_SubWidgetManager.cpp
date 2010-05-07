@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -35,7 +36,7 @@
 namespace MyGUI
 {
 
-	template <> const char* Singleton<SubWidgetManager>::INSTANCE_TYPE_NAME("SubWidgetManager");
+	MYGUI_INSTANCE_IMPLEMENT( SubWidgetManager )
 
 	void SubWidgetManager::initialise()
 	{
@@ -71,13 +72,13 @@ namespace MyGUI
 
 		FactoryManager& factory = FactoryManager::getInstance();
 
-		factory.unregisterFactory<SubSkinStateInfo>("BasisSkin/State", "SubSkin");
-		factory.unregisterFactory<SubSkinStateInfo>("BasisSkin/State", "MainSkin");
-		factory.unregisterFactory<SubSkinStateInfo>("BasisSkin/State", "RotatingSkin");
-		factory.unregisterFactory<SubSkinStateInfo>("BasisSkin/State", "RawRect");
-		factory.unregisterFactory<TileRectStateInfo>("BasisSkin/State", "TileRect");
-		factory.unregisterFactory<EditTextStateInfo>("BasisSkin/State", "EditText");
-		factory.unregisterFactory<EditTextStateInfo>("BasisSkin/State", "SimpleText");
+		factory.unregisterFactory("BasisSkin/State", "SubSkin");
+		factory.unregisterFactory("BasisSkin/State", "MainSkin");
+		factory.unregisterFactory("BasisSkin/State", "RotatingSkin");
+		factory.unregisterFactory("BasisSkin/State", "RawRect");
+		factory.unregisterFactory("BasisSkin/State", "TileRect");
+		factory.unregisterFactory("BasisSkin/State", "EditText");
+		factory.unregisterFactory("BasisSkin/State", "SimpleText");
 
 		factory.unregisterFactory<SubSkin>("BasisSkin");
 		factory.unregisterFactory<MainSkin>("BasisSkin");

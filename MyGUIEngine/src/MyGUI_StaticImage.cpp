@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -24,6 +25,7 @@
 #include "MyGUI_CoordConverter.h"
 #include "MyGUI_ResourceManager.h"
 #include "MyGUI_ResourceSkin.h"
+#include "MyGUI_RotatingSkin.h"
 #include "MyGUI_Gui.h"
 #include "MyGUI_TextureUtility.h"
 
@@ -48,11 +50,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void StaticImage::_shutdown()
+	StaticImage::~StaticImage()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void StaticImage::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -111,8 +111,6 @@ namespace MyGUI
 
 		recalcIndexes();
 		updateSelectIndex(mIndexSelect);
-
-		setDesiredSize(mSizeTile);
 	}
 
 	void StaticImage::setImageCoord(const IntCoord& _coord)
@@ -160,8 +158,6 @@ namespace MyGUI
 			recalcIndexes();
 			updateSelectIndex(mIndexSelect);
 		}
-
-		setDesiredSize(mSizeTexture);
 	}
 
 	void StaticImage::recalcIndexes()
@@ -376,26 +372,16 @@ namespace MyGUI
 		iter->images.erase(iter->images.begin() + _indexFrame);
 	}
 
-	void StaticImage::setDesiredSize(const IntSize& _size)
-	{
-		mNativeImageSize = _size;
-		invalidateMeasure();
-	}
-
 	void StaticImage::setItemResourceInfo(const ImageIndexInfo& _info)
 	{
 		mCurrentTextureName = _info.texture;
 		mSizeTexture = texture_utility::getTextureSize(mCurrentTextureName);
-
-		IntSize image_size = mSizeTexture;
 
 		mItems.clear();
 
 		if (_info.frames.size() != 0)
 		{
 			std::vector<IntPoint>::const_iterator iter = _info.frames.begin();
-
-			image_size = _info.size;
 
 			addItem(IntCoord(*iter, _info.size));
 			setItemFrameRate(0, _info.rate);
@@ -404,12 +390,18 @@ namespace MyGUI
 			{
 				addItemFrame(0, MyGUI::IntCoord(*iter, _info.size));
 			}
+
 		}
 
 		mIndexSelect = 0;
 		updateSelectIndex(mIndexSelect);
+	}
 
-		setDesiredSize(image_size);
+	bool StaticImage::setItemResource(const Guid& _id)
+	{
+		IResourcePtr resource = _id.empty() ? nullptr : ResourceManager::getInstance().getByID(_id, false);
+		setItemResourcePtr(resource ? resource->castType<ResourceImageSet>() : nullptr);
+		return resource != nullptr;
 	}
 
 	bool StaticImage::setItemResource(const std::string& _name)
@@ -541,14 +533,6 @@ namespace MyGUI
 			return;
 		}
 		eventChangeProperty(this, _key, _value);
-	}
-
-	IntSize StaticImage::overrideMeasure(const IntSize& _sizeAvailable)
-	{
-		IntSize result = Base::overrideMeasure(_sizeAvailable);
-		result.width = std::max(result.width, mNativeImageSize.width);
-		result.height = std::max(result.height, mNativeImageSize.height);
-		return result;
 	}
 
 } // namespace MyGUI

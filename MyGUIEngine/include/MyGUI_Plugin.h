@@ -2,6 +2,7 @@
 	@file
 	@author		Denis Koronchik
 	@date		09/2007
+	@module
 */
 /*
 	This file is part of MyGUI.

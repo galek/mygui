@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 #include "precompiled.h"
 #include "DemoKeeper.h"
@@ -24,11 +25,11 @@ namespace demo
 
 	void DemoKeeper::createScene()
 	{
-		MyGUI::ResourceManager::getInstance().load("Wallpaper0.layout");
-		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().loadLayout("BackHelp.layout");
+		getGUI()->load("Wallpaper0.layout");
+		MyGUI::VectorWidgetPtr& root = MyGUI::LayoutManager::getInstance().load("BackHelp.layout");
 		root.at(0)->findWidget("Text")->setCaption("Truetype font generation with possibility to save into MyGUI font config file.");
 
-		MyGUI::ResourceManager::getInstance().load("external.xml");
+		getGUI()->load("external.xml");
 
 		mFontPanel = new FontPanel();
 	}

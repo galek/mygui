@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		03/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -22,15 +23,13 @@
 #include "MyGUI_Precompiled.h"
 #include "MyGUI_IWidgetCreator.h"
 #include "MyGUI_Widget.h"
-#include "MyGUI_WidgetManager.h"
 
 namespace MyGUI
 {
 
 	void IWidgetCreator::_deleteWidget(Widget* _widget)
 	{
-		_widget->_shutdown();
-		WidgetManager::getInstance()._addWidgetToDestroy(_widget);
+		delete _widget;
 	}
 
 } // namespace MyGUI

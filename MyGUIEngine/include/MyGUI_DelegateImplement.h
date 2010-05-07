@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -143,16 +144,11 @@ namespace delegates
 		typedef  MYGUI_I_DELEGATE MYGUI_TEMPLATE_ARGS  IDelegate;
 
 		MYGUI_C_DELEGATE () : mDelegate(nullptr) { }
-		MYGUI_C_DELEGATE (const MYGUI_C_DELEGATE  MYGUI_TEMPLATE_ARGS& _event) : mDelegate(nullptr)
+		MYGUI_C_DELEGATE (const MYGUI_C_DELEGATE  MYGUI_TEMPLATE_ARGS& _event)
 		{
 			// забираем себе владение
-			IDelegate* del = _event.mDelegate;
+			mDelegate = _event.mDelegate;
 			const_cast< MYGUI_C_DELEGATE  MYGUI_TEMPLATE_ARGS& >(_event).mDelegate = nullptr;
-
-			if (mDelegate != nullptr && !mDelegate->compare(del))
-				delete mDelegate;
-
-			mDelegate = del;
 		}
 		~MYGUI_C_DELEGATE () { clear(); }
 
@@ -177,13 +173,9 @@ namespace delegates
 		MYGUI_C_DELEGATE  MYGUI_TEMPLATE_ARGS & operator=(const MYGUI_C_DELEGATE  MYGUI_TEMPLATE_ARGS& _event)
 		{
 			// забираем себе владение
-			IDelegate* del = _event.mDelegate;
+			delete mDelegate;
+			mDelegate = _event.mDelegate;
 			const_cast< MYGUI_C_DELEGATE  MYGUI_TEMPLATE_ARGS& >(_event).mDelegate = nullptr;
-
-			if (mDelegate != nullptr && !mDelegate->compare(del))
-				delete mDelegate;
-
-			mDelegate = del;
 
 			return *this;
 		}
@@ -291,59 +283,15 @@ namespace delegates
 			}
 		}
 
-		MYGUI_C_MULTI_DELEGATE (const MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS & _event)
-		{
-			// забираем себе владение
-			ListDelegate del = _event.mListDelegates;
-			const_cast< MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS& >(_event).mListDelegates.clear();
-
-			safe_clear(del);
-
-			mListDelegates = del;
-		}
-
-		MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS & operator=(const MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS & _event)
-		{
-			// забираем себе владение
-			ListDelegate del = _event.mListDelegates;
-			const_cast< MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS& >(_event).mListDelegates.clear();
-
-			safe_clear(del);
-
-			mListDelegates = del;
-
-			return *this;
-		}
-
 	private:
-		void safe_clear(ListDelegate& _delegates)
-		{
-			for (ListDelegateIterator iter=mListDelegates.begin(); iter!=mListDelegates.end(); ++iter)
-			{
-				if (*iter)
-				{
-					IDelegate* del = (*iter);
-					(*iter) = nullptr;
-					delete_is_not_found(del, _delegates);
-				}
-			}
-		}
+		// constructor and operator =, without implementation, just for private
+		MYGUI_C_MULTI_DELEGATE (const MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS & _event);
+		MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS & operator=(const MYGUI_C_MULTI_DELEGATE  MYGUI_TEMPLATE_ARGS & _event);
 
-		void delete_is_not_found(IDelegate* _del, ListDelegate& _delegates)
-		{
-			for (ListDelegateIterator iter=_delegates.begin(); iter!=_delegates.end(); ++iter)
-			{
-				if ((*iter) && (*iter)->compare(_del))
-				{
-					return;
-				}
-			}
-
-			delete _del;
-		}
 
 	private:
 		ListDelegate mListDelegates;
+
 	};
 
 

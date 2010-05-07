@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -37,7 +38,7 @@ namespace MyGUI
 		ITexture* texture = render.createTexture(_file);
 		texture->loadFromFile(_file);
 
-		uint8_t* buffer = (uint8_t*)texture->lock(TextureUsage::Read);
+		uint8 * buffer = (uint8*)texture->lock(TextureUsage::Read);
 		if (buffer == 0)
 		{
 			render.destroyTexture(texture);
@@ -54,12 +55,12 @@ namespace MyGUI
 		size_t pos = 0;
 		for (size_t pos_pix=0; pos_pix<size; pos_pix++)
 		{
-			bool white = false;
+			uint8 white = 0;
 			for (size_t in_pix=0; in_pix<pixel_size; in_pix++)
 			{
 				if (0xFF != buffer[pos])
 				{
-					white = true;
+					white = 1;
 				}
 				pos++;
 			}

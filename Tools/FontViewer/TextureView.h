@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 #ifndef __TEXTURE_VIEW_H__
 #define __TEXTURE_VIEW_H__
@@ -20,6 +21,8 @@ namespace demo
 		void setFontName(const std::string& _value);
 
 	private:
+		MyGUI::ScrollView* mScrollView;
+		MyGUI::StaticImage* mImageBack;
 		MyGUI::StaticImage* mImageTexture;
 	};
 

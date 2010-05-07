@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		01/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,12 +24,13 @@
 #include "MyGUI_Message.h"
 #include "MyGUI_ResourceSkin.h"
 #include "MyGUI_WidgetManager.h"
+#include "MyGUI_LayerManager.h"
 #include "MyGUI_InputManager.h"
+#include "MyGUI_ResourceManager.h"
 #include "MyGUI_Gui.h"
 #include "MyGUI_ControllerManager.h"
 #include "MyGUI_StaticImage.h"
 #include "MyGUI_LanguageManager.h"
-#include "MyGUI_RenderManager.h"
 
 namespace MyGUI
 {
@@ -56,11 +58,9 @@ namespace MyGUI
 		initialiseWidgetSkin(_info);
 	}
 
-	void Message::_shutdown()
+	Message::~Message()
 	{
 		shutdownWidgetSkin();
-
-		Base::_shutdown();
 	}
 
 	void Message::baseChangeWidgetSkin(ResourceSkin* _info)
@@ -262,8 +262,8 @@ namespace MyGUI
 		{
 			if (nullptr == mWidgetFade)
 			{
-				IntSize size = RenderManager::getInstance().getViewSize();
-				mWidgetFade = Gui::getInstance().createWidgetT(Widget::getClassTypeName(), mFadeSkin, IntCoord(0, 0, size.width, size.height), Align::Stretch, mFadeLayer);
+				Gui& gui = Gui::getInstance();
+				mWidgetFade = gui.createWidgetT(Widget::getClassTypeName(), mFadeSkin, IntCoord(0, 0, gui.getViewSize().width, gui.getViewSize().height), Align::Stretch, mFadeLayer);
 				if (mSmoothShow)
 				{
 					mWidgetFade->setVisible(false);
@@ -357,7 +357,7 @@ namespace MyGUI
 		int offset = (size.width - width)/2;
 		offset += mButtonOffset.width;
 
-		const IntSize& view = getParentSize();
+		const IntSize& view = Gui::getInstance().getViewSize();
 		setCoord((view.width-size.width)/2, (view.height-size.height)/2, size.width, size.height);
 
 		if (nullptr != mIcon)

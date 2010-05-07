@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,7 +24,7 @@
 #define __MYGUI_WIDGET_MANAGER_H__
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_IWidgetCreator.h"
 #include "MyGUI_IUnlinkWidget.h"
 #include "MyGUI_ICroppedRectangle.h"
@@ -36,8 +37,10 @@ namespace MyGUI
 	//OBSOLETE
 	typedef delegates::CDelegate3<Widget*,  const std::string &, const std::string &> ParseDelegate;
 
-	class MYGUI_EXPORT WidgetManager : public MyGUI::Singleton<WidgetManager>
+	class MYGUI_EXPORT WidgetManager
 	{
+		MYGUI_INSTANCE_HEADER( WidgetManager )
+
 	public:
 		//OBSOLETE
 		typedef std::map<std::string, ParseDelegate> MapDelegate;
@@ -64,11 +67,13 @@ namespace MyGUI
 		/** Unlink widget */
 		void unlinkFromUnlinkers(Widget* _widget);
 
-		/** Check if factory with specified widget type exist */
-		bool isFactoryExist(const std::string& _type);
+		// добавляет виджет в список для анлинка
+		void addWidgetToUnlink(Widget* _widget);
 
-		void _addWidgetToDestroy(Widget* _widget);
-		void _deleteDelayWidgets();
+		// проверяет, и если надо обнуляет виджет из списка анликнутых
+		void removeWidgetFromUnlink(Widget*& _widget);
+
+		bool isFactoryExist(const std::string& _type);
 
 	/*obsolete:*/
 #ifndef MYGUI_DONT_USE_OBSOLETE
@@ -84,7 +89,7 @@ namespace MyGUI
 		MYGUI_OBSOLETE("")
 		void unregisterFactory(IWidgetFactory * _factory);
 		MYGUI_OBSOLETE("use : void Widget::setProperty(const std::string &_key, const std::string &_value)")
-		void parse(Widget* _widget, const std::string &_key, const std::string &_value) { _parse(_widget, _key, _value); }
+		void parse(Widget* _widget, const std::string &_key, const std::string &_value);
 		MYGUI_OBSOLETE("")
 		ParseDelegate& registerDelegate(const std::string& _key);
 		MYGUI_OBSOLETE("")
@@ -106,12 +111,7 @@ namespace MyGUI
 			return findWidget<T>(_prefix + _name, _throw);
 		}
 
-		void _parse(Widget* _widget, const std::string &_key, const std::string &_value);
-
 #endif // MYGUI_DONT_USE_OBSOLETE
-
-	private:
-		void notifyEventFrameStart(float _time);
 
 	protected:
 		SetWidgetFactory mFactoryList;
@@ -122,9 +122,7 @@ namespace MyGUI
 		VectorIUnlinkWidget mVectorIUnlinkWidget;
 
 		// список виджетов для отписки
-		//VectorWidgetPtr mUnlinkWidgets;
-		// список виджето для удаления
-		VectorWidgetPtr mDestroyWidgets;
+		VectorWidgetPtr mUnlinkWidgets;
 	};
 
 } // namespace MyGUI

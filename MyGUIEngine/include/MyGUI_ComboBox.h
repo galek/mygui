@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -160,7 +161,6 @@ namespace MyGUI
 
 	/*internal:*/
 		virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-		virtual void _shutdown();
 
 	/*obsolete:*/
 #ifndef MYGUI_DONT_USE_OBSOLETE
@@ -192,23 +192,24 @@ namespace MyGUI
 #endif // MYGUI_DONT_USE_OBSOLETE
 
 	protected:
+		virtual ~ComboBox();
+
+		virtual void onKeyButtonPressed(KeyCode _key, Char _char);
+
 		virtual void baseChangeWidgetSkin(ResourceSkin* _info);
 
-		virtual void onEventMouseButtonClick(Widget* _sender, EventInfo* _info, MouseButtonEventArgs* _args);
-		virtual void onEventMouseWheel(Widget* _sender, EventInfo* _info, MouseWheelEventArgs* _args);
-		virtual void onEventKeyButtonDown(Widget* _sender, EventInfo* _info, KeyButtonEventArgs* _args);
-
 	private:
+		void notifyButtonPressed(Widget* _sender, int _left, int _top, MouseButton _id);
 		void notifyListLostFocus(Widget* _sender, MyGUI::Widget* _new);
 		void notifyListSelectAccept(List* _widget, size_t _position);
 		void notifyListMouseItemActivate(List* _widget, size_t _position);
 		void notifyListChangePosition(List* _widget, size_t _position);
+		void notifyMouseWheel(Widget* _sender, int _rel);
+		void notifyMousePressed(Widget* _sender, int _left, int _top, MouseButton _id);
 		void notifyEditTextChange(Edit* _sender);
 
 		void showList();
 		void hideList();
-		void changeDropState();
-		void scrollCaption(int _delta);
 
 		void initialiseWidgetSkin(ResourceSkin* _info);
 		void shutdownWidgetSkin();

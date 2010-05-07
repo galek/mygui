@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		04/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -34,7 +35,6 @@ namespace MyGUI
 	class MYGUI_EXPORT ITextureInvalidateListener
 	{
 	public:
-		virtual ~ITextureInvalidateListener() { }
 		virtual void textureInvalidate(ITexture* _texture) = 0;
 	};
 

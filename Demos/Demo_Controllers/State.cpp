@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2008
+	@module
 */
 #include "precompiled.h"
 #include "State.h"
@@ -87,8 +88,9 @@ namespace demo
 		mCountTime += _time;
 
 		const int offset = 30;
+		//const int offset_jamp = 1;
+		const MyGUI::IntSize & view = MyGUI::Gui::getInstance().getViewSize();
 		const float time_diff = 0.3;
-		const MyGUI::IntSize & view = MyGUI::RenderManager::getInstance().getViewSize();
 
 		if (!mMainWidget->isVisible())
 		{

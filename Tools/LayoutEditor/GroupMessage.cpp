@@ -2,13 +2,13 @@
 #include "Common.h"
 #include "GroupMessage.h"
 
-template <> const char* MyGUI::Singleton<GroupMessage>::INSTANCE_TYPE_NAME("GroupMessage");
+MYGUI_INSTANCE_IMPLEMENT( GroupMessage )
 
-void GroupMessage::addMessage(const MyGUI::UString & _message, MyGUI::LogLevel _type)
+void GroupMessage::addMessage(const MyGUI::UString & _message, MyGUI::LogManager::LogLevel _type)
 {
-	if (_type == MyGUI::LogLevel::Error)
+	if (_type == MyGUI::LogManager::Error)
 		mErrorMessages.push_back(_message);
-	else /*if (_type == MyGUI::LogLevel::Warning)*/
+	else /*if (_type == MyGUI::LogManager::Warning)*/
 		mWarningMessages.push_back(_message);
 }
 

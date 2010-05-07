@@ -4,26 +4,31 @@
 //#include "BasisManager.h"
 #include "WidgetTypes.h"
 #include "GroupMessage.h"
-#include "CodeGenerator.h"
 
 const std::string LogSection = "LayoutEditor";
 
-template <> const char* MyGUI::Singleton<EditorWidgets>::INSTANCE_TYPE_NAME("EditorWidgets");
-
+//MYGUI_INSTANCE_IMPLEMENT( EditorWidgets )
+const std::string INSTANCE_TYPE_NAME("EditorWidgets");
+EditorWidgets* EditorWidgets::msInstance = nullptr;
+EditorWidgets* EditorWidgets::getInstancePtr() { return msInstance; }
+EditorWidgets& EditorWidgets::getInstance() { MYGUI_ASSERT(0 != msInstance, "instance " << INSTANCE_TYPE_NAME << " was not created"); return (*msInstance); }
 EditorWidgets::EditorWidgets() :
+	mIsInitialise(false),
 	global_counter(0),
-	widgets_changed(false),
-	mCodeGenerator(nullptr)
+	widgets_changed(false)
 {
+	MYGUI_ASSERT(0 == msInstance, "instance " << INSTANCE_TYPE_NAME << " is exsist");
+	msInstance = this;
 }
 EditorWidgets::~EditorWidgets()
 {
+	msInstance = nullptr;
 }
 
-void MapSet(VectorStringPairs & _map, const std::string &_key, const std::string &_value)
+void MapSet(StringPairs & _map, const std::string &_key, const std::string &_value)
 {
 	bool find = false;
-	for (VectorStringPairs::iterator iter=_map.begin(); iter!=_map.end(); ++iter)
+	for (StringPairs::iterator iter=_map.begin(); iter!=_map.end(); ++iter)
 	{
 		if (iter->first == _key)
 		{
@@ -37,9 +42,9 @@ void MapSet(VectorStringPairs & _map, const std::string &_key, const std::string
 	}
 }
 
-VectorStringPairs::iterator MapFind(VectorStringPairs & _map, const std::string &_key)
+StringPairs::iterator MapFind(StringPairs & _map, const std::string &_key)
 {
-	VectorStringPairs::iterator iter = _map.begin();
+	StringPairs::iterator iter = _map.begin();
 	for (; iter!=_map.end(); ++iter)
 	{
 		if (iter->first == _key) break;
@@ -47,9 +52,9 @@ VectorStringPairs::iterator MapFind(VectorStringPairs & _map, const std::string 
 	return iter;
 }
 
-void MapErase(VectorStringPairs & _map, const std::string &_key)
+void MapErase(StringPairs & _map, const std::string &_key)
 {
-	for (VectorStringPairs::iterator iter = _map.begin(); iter != _map.end(); ++iter)
+	for (StringPairs::iterator iter = _map.begin(); iter != _map.end(); ++iter)
 	{
 		if (iter->first == _key)
 		{
@@ -110,10 +115,8 @@ bool EditorWidgets::load(const MyGUI::UString& _fileName)
 		if (type == "Layout")
 		{
 			// берем детей и крутимся
-			MyGUI::xml::ElementEnumerator element = root->getElementEnumerator();
-			while (element.next("Widget")) parseWidget(element, nullptr);
-			element = root->getElementEnumerator();
-			while (element.next("CodeGenaratorSettings")) mCodeGenerator->loadProperties(element);
+			MyGUI::xml::ElementEnumerator widget = root->getElementEnumerator();
+			while (widget.next("Widget")) parseWidget(widget, 0);
 		}
 		else
 		{
@@ -139,8 +142,6 @@ bool EditorWidgets::save(const MyGUI::UString& _fileName)
 		// в корень только сирот
 		if (nullptr == (*iter)->widget->getParent()) serialiseWidget(*iter, root);
 	}
-
-	mCodeGenerator->saveProperties(root);
 
 	if (!doc.save(_fileName))
 	{
@@ -301,7 +302,7 @@ void EditorWidgets::parseWidget(MyGUI::xml::ElementEnumerator & _widget, MyGUI::
 	{
 		container->relative_mode = true;
 		//FIXME парент может быть и не кроппед
-		coord = MyGUI::CoordConverter::convertFromRelative(MyGUI::FloatCoord::parse(position), _parent == nullptr ? MyGUI::RenderManager::getInstance().getViewSize() : _parent->getSize());
+		coord = MyGUI::CoordConverter::convertFromRelative(MyGUI::FloatCoord::parse(position), _parent == nullptr ? MyGUI::Gui::getInstance().getViewSize() : _parent->getSize());
 	}
 
 	// в гуе на 2 одноименных виджета ругается и падает, а у нас будет просто переименовывать
@@ -314,7 +315,7 @@ void EditorWidgets::parseWidget(MyGUI::xml::ElementEnumerator & _widget, MyGUI::
 			// FIXME : not translated string
 			std::string mess = MyGUI::utility::toString("Widget with name '", container->name, "' already exist. Renamed to '", container->name, renameN, "'.");
 			MYGUI_LOGGING(LogSection, Warning, mess);
-			GroupMessage::getInstance().addMessage(mess, MyGUI::LogLevel::Warning);
+			GroupMessage::getInstance().addMessage(mess, MyGUI::LogManager::Warning);
 			container->name = MyGUI::utility::toString(container->name, renameN++);
 		}
 	}
@@ -340,7 +341,7 @@ void EditorWidgets::parseWidget(MyGUI::xml::ElementEnumerator & _widget, MyGUI::
 		else  tmp = "'" + skin + "'";
 		// FIXME : not translated string
 		std::string mess = MyGUI::utility::toString("'", container->skin, "' skin not found , temporary changed to ", tmp);
-		GroupMessage::getInstance().addMessage(mess, MyGUI::LogLevel::Error);
+		GroupMessage::getInstance().addMessage(mess, MyGUI::LogManager::Error);
 	}
 
 	if (nullptr == _parent)
@@ -423,7 +424,7 @@ bool EditorWidgets::tryToApplyProperty(MyGUI::Widget* _widget, const std::string
 		{
 			if (!MyGUI::DataManager::getInstance().isDataExist(_value))
 			{
-				GroupMessage::getInstance().addMessage("No such " + _key + ": '" + _value + "'. This value will be saved.", MyGUI::LogLevel::Warning);
+				GroupMessage::getInstance().addMessage("No such " + _key + ": '" + _value + "'. This value will be saved.", MyGUI::LogManager::Warning);
 				return true;
 			}
 		}
@@ -432,7 +433,7 @@ bool EditorWidgets::tryToApplyProperty(MyGUI::Widget* _widget, const std::string
 		{
 			// для поддержки старых пропертей
 #ifndef MYGUI_DONT_USE_OBSOLETE
-			MyGUI::WidgetManager::getInstance()._parse(_widget, _key, _value);
+			MyGUI::WidgetManager::getInstance().parse(_widget, _key, _value);
 #else
 			_widget->setProperty(_key, _value);
 #endif
@@ -442,7 +443,7 @@ bool EditorWidgets::tryToApplyProperty(MyGUI::Widget* _widget, const std::string
 	}
 	catch(...)
 	{
-		GroupMessage::getInstance().addMessage("Can't apply '" + _key + "'property.", MyGUI::LogLevel::Error);
+		GroupMessage::getInstance().addMessage("Can't apply '" + _key + "'property.", MyGUI::LogManager::Error);
 		return false;
 	}
 	return true;
@@ -460,14 +461,14 @@ void EditorWidgets::serialiseWidget(WidgetContainer * _container, MyGUI::xml::El
 	if ("" != _container->layer) node->addAttribute("layer", _container->layer);
 	if ("" != _container->name) node->addAttribute("name", _container->name);
 
-	for (VectorStringPairs::iterator iter = _container->mProperty.begin(); iter != _container->mProperty.end(); ++iter)
+	for (StringPairs::iterator iter = _container->mProperty.begin(); iter != _container->mProperty.end(); ++iter)
 	{
 		MyGUI::xml::ElementPtr nodeProp = node->createChild("Property");
 		nodeProp->addAttribute("key", iter->first);
 		nodeProp->addAttribute("value", iter->second);
 	}
 
-	for (VectorStringPairs::iterator iter = _container->mUserString.begin(); iter != _container->mUserString.end(); ++iter)
+	for (StringPairs::iterator iter = _container->mUserString.begin(); iter != _container->mUserString.end(); ++iter)
 	{
 		MyGUI::xml::ElementPtr nodeProp = node->createChild("UserString");
 		nodeProp->addAttribute("key", iter->first);

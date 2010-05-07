@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -22,7 +23,7 @@
 #ifndef __MYGUI_LAST_HEADER_H__
 #define __MYGUI_LAST_HEADER_H__
 
-// used to enable deprecated warnings, disabled by Ogre
+// used to enable deprecated warningd, disabled by Ogre
 #if MYGUI_COMPILER == MYGUI_COMPILER_MSVC
 
 #	pragma warning( default: 4996)

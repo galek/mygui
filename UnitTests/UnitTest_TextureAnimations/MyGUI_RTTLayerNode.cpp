@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		06/2008
+	@module
 */
 
 #include "MyGUI_RTTLayerNode.h"
@@ -17,10 +18,10 @@ namespace MyGUI
 		mVertexBuffer(nullptr),
 		mTexture(nullptr),
 		mOutOfDate(false),
-		mMajorUpdate(false),
 		mChacheUsing(true),
-		mDestroy(false),
-		mIsAnimate(false)
+		mMajorUpdate(false),
+		mIsAnimate(false),
+		mDestroy(false)
 	{
 	}
 
@@ -110,11 +111,9 @@ namespace MyGUI
 			float texture_u = (float)mCurrentCoord.width / (float)mTexture->getWidth();
 			float texture_v = (float)mCurrentCoord.height / (float)mTexture->getHeight();
 
-			ColourARGB colour;
-			colour.value = ColourARGB::White;
 			mDefaultData.set(
 				vertex_left, vertex_top, vertex_right, vertex_bottom, vertex_z,
-				0, 0, texture_u, texture_v, colour
+				0, 0, texture_u, texture_v, 0xFFFFFFFF
 				);
 		}
 
@@ -188,7 +187,7 @@ namespace MyGUI
 			mOutOfDate = false;
 		}
 
-		if (mIsAnimate || !mDestroy)
+		if (!(!mIsAnimate && mDestroy))
 		{
 			_target->doRender(mVertexBuffer, mTexture, count_quad * VertexQuad::VertexCount);
 		}
@@ -198,7 +197,7 @@ namespace MyGUI
 	{
 		if (mTextureSize.width < mCurrentCoord.width || mTextureSize.height < mCurrentCoord.height)
 		{
-			//RenderManager& render = RenderManager::getInstance();
+			RenderManager& render = RenderManager::getInstance();
 
 			if (mTexture != nullptr)
 			{

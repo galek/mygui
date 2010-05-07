@@ -3,6 +3,7 @@
 	@author		Alexander Buryak - Rageous
 	@author		Albert Semenov
 	@date		09/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -32,7 +33,7 @@ namespace MyGUI
 {
 
 	//VC++ 7.1
-	#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC && MYGUI_COMP_VER <= 1310
+	#if MYGUI_COMPILER == MYGUI_COMPILER_MSVC && MYGUI_COMP_VER == 1310
 		#define MYGUI_DECLARE_TYPE_NAME( Type ) \
 		private: \
 			struct TypeNameHolder { const std::string& getClassTypeName() { static std::string type = #Type; return type; } }; \
@@ -83,7 +84,20 @@ namespace MyGUI
 			/** Compare with selected type */ \
 			virtual bool isType( const std::type_info& _type ) const { return typeid( DerivedType ) == _type || Base::isType( _type ); } \
 			/** Compare with selected type */ \
-			template<typename Type> bool isType() const { return isType( typeid( Type )); }
+			template<typename Type> bool isType() const { return isType( typeid( DerivedType )); }
+
+	//OBSOLETE
+	#define MYGUI_RTTI_CHILD_HEADER( DerivedType, BaseType ) \
+		public: \
+			MYGUI_DECLARE_TYPE_NAME( DerivedType ) \
+			typedef BaseType Base; \
+			typedef DerivedType RTTIBase; \
+			/** Compare with selected type */ \
+			virtual bool isType( const std::type_info& _type ) const { return typeid( DerivedType ) == _type || BaseType::isType( _type ); }
+
+
+	//OBSOLETE
+	#define MYGUI_RTTI_BASE_HEADER( BaseType ) MYGUI_RTTI_BASE( BaseType )
 
 } // namespace MyGUI
 

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		07/2008
+	@module
 */
 #ifndef __TOOL_TIP_H__
 #define __TOOL_TIP_H__
@@ -18,11 +19,11 @@ namespace demo
 	public:
 		ToolTip();
 
-		void show(ItemData * _data);
+		void show(ItemData * _data, const MyGUI::IntPoint & _point);
 		void hide();
-		void move(const MyGUI::IntPoint & _point);
 
 	private:
+
 		MyGUI::StaticText* mTextName;
 		MyGUI::StaticText* mTextCount;
 		MyGUI::Edit* mTextDesc;

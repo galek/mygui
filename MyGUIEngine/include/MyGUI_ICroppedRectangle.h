@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -34,6 +35,7 @@ namespace MyGUI
 		ICroppedRectangle() :
 			mIsMargin(false),
 			mCroppedParent(nullptr),
+			mVisible(true),
 			mAlign(Align::Default)
 		{ }
 
@@ -56,6 +58,11 @@ namespace MyGUI
 		virtual void setSize(const IntSize& _value) { mCoord.width = _value.width; mCoord.height = _value.height; }
 		/** Get size */
 		IntSize getSize() const { return mCoord.size(); }
+
+		/** Hide or show */
+		virtual void setVisible(bool _value) { mVisible = _value; }
+		/** Return true if visible */
+		bool isVisible() const { return mVisible; }
 
 		/** Get position in screen coordinates */
 		const IntPoint& getAbsolutePosition() const { return mAbsolutePosition; }
@@ -102,8 +109,8 @@ namespace MyGUI
 
 		virtual void _updateView() { }
 		virtual void _correctView() { }
-		//virtual void _setAlign(const IntSize& _oldsize, bool _update)  { }
-		//virtual void _setAlign(const IntCoord& _oldcoord, bool _update) { }
+		virtual void _setAlign(const IntSize& _oldsize, bool _update)  { }
+		virtual void _setAlign(const IntCoord& _oldcoord, bool _update) { }
 
 		void _setCroppedParent(ICroppedRectangle* _parent) { mCroppedParent = _parent; }
 
@@ -112,6 +119,18 @@ namespace MyGUI
 		int _getMarginRight() const { return mMargin.right; }
 		int _getMarginTop() const { return mMargin.top; }
 		int _getMarginBottom() const { return mMargin.bottom; }
+
+	/*obsolete:*/
+#ifndef MYGUI_DONT_USE_OBSOLETE
+
+		MYGUI_OBSOLETE("use : void ICroppedRectangle::setVisible(bool _visible)")
+		void show() { setVisible(true); }
+		MYGUI_OBSOLETE("use : void ICroppedRectangle::setVisible(bool _visible)")
+		void hide() { setVisible(false); }
+		MYGUI_OBSOLETE("use : bool ICroppedRectangle::isVisible()")
+		bool isShow() { return isVisible(); }
+
+#endif // MYGUI_DONT_USE_OBSOLETE
 
 	protected:
 		bool _checkPoint(int _left, int _top)
@@ -184,6 +203,7 @@ namespace MyGUI
 		IntPoint mAbsolutePosition; // обсолютные координаты
 
 		ICroppedRectangle * mCroppedParent;
+		bool mVisible;
 		Align mAlign;
 
 	};

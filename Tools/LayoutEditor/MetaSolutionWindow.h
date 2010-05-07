@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		04/2009
+	@module
 */
 #ifndef __META_SOLUTION_WINDOW_H__
 #define __META_SOLUTION_WINDOW_H__
@@ -22,7 +23,7 @@ struct MetaWidget
 	std::vector<MetaWidget *> mChilds;
 	std::string mName;
 	std::string mType;
-	std::string mTarget;
+	MyGUI::Guid mTarget;
 };
 
 struct MetaForm
@@ -39,7 +40,7 @@ struct MetaForm
 	std::vector<MetaWidget*> mChilds;
 	std::string mDecription;
 	std::string mLayoutName;
-	std::string mId;
+	MyGUI::Guid mId;
 
 	bool mCollapsed;
 };
@@ -77,8 +78,8 @@ private:
 
 	int addMetaWidgets(std::vector<MetaWidget*> _childs, size_t _index, std::string _level);
 	void collapseAll();
-	void loadTarget(const std::string& _target);
-	bool findTarget(const std::string& _target);
+	void loadTarget(MyGUI::Guid _target);
+	bool findTarget(MyGUI::Guid _target);
 
 	MyGUI::Widget* createWidget(MetaWidget * _widget, MyGUI::Widget* _parent);
 

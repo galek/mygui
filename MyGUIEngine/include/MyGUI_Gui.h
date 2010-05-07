@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -24,7 +25,7 @@
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_Types.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_XmlDocument.h"
 #include "MyGUI_IWidgetCreator.h"
 #include "MyGUI_IUnlinkWidget.h"
@@ -35,14 +36,12 @@ namespace MyGUI
 
 	typedef delegates::CMultiDelegate1<float> FrameEventDelegate;
 
-	class MYGUI_EXPORT Gui :
-		public IWidgetCreator,
-		public IUnlinkWidget,
-		public Singleton<Gui>
+	class MYGUI_EXPORT Gui : public IWidgetCreator, public IUnlinkWidget
 	{
-	public:
-		Gui();
+		friend class WidgetManager;
+		MYGUI_INSTANCE_HEADER( Gui )
 
+	public:
 		/** Initialise GUI and all GUI Managers
 			@param
 				_core name of core config file for MyGUI (contain main config files with skins, layers, fonts, etc.)
@@ -61,7 +60,7 @@ namespace MyGUI
 			@param _coord int coordinates of widget (_left, _top, _width, _height)
 			@param _align widget align (possible values can be found in enum Align)
 			@param _layer layer where widget will be created (all layers usually defined in core.layer file).
-				If your widget will overlap with any other you shoud select _layer with "Overlapped" or similar type.
+				If your widget will overlap with any other you shoud select _layer with "overlapped" property enabled.
 			@param _name if needed (you can use it for finding widget by name later)
 		*/
 		Widget* createWidgetT(const std::string& _type, const std::string& _skin, const IntCoord& _coord, Align _align, const std::string& _layer, const std::string& _name = "")
@@ -73,7 +72,7 @@ namespace MyGUI
 		{
 			return createWidgetT(_type, _skin, IntCoord(_left, _top, _width, _height), _align, _layer, _name);
 		}
-		/** Create widget using coordinates relative to parent widget. see Gui::createWidgetT */
+		/** Create widget using coordinates relative to parent. see Gui::createWidgetT */
 		Widget* createWidgetRealT(const std::string& _type, const std::string& _skin, const FloatCoord& _coord, Align _align, const std::string& _layer, const std::string& _name = "")
 		{
 			return createWidgetT(_type, _skin, IntCoord((int)(_coord.left*mViewSize.width), (int)(_coord.top*mViewSize.height), (int)(_coord.width*mViewSize.width), (int)(_coord.height*mViewSize.height)), _align, _layer, _name);
@@ -110,6 +109,35 @@ namespace MyGUI
 			return static_cast<T*>(createWidgetRealT(T::getClassTypeName(), _skin, _left, _top, _width, _height, _align, _layer, _name));
 		}
 
+		/** Get view size of GUI area */
+		const IntSize& getViewSize() const { return mViewSize; }
+
+		int getViewWidth() { return mViewSize.width; }
+		int getViewHeight() { return mViewSize.height; }
+
+		// mirror of InputManager methods
+		/** Inject MouseMove event
+			@return true if event has been processed by GUI
+		*/
+		bool injectMouseMove(int _absx, int _absy, int _absz);
+		/** Inject MousePress event
+			@return true if event has been processed by GUI
+		*/
+		bool injectMousePress(int _absx, int _absy, MouseButton _id);
+		/** Inject MouseRelease event
+			@return true if event has been processed by GUI
+		*/
+		bool injectMouseRelease(int _absx, int _absy, MouseButton _id);
+
+		/** Inject KeyPress event
+			@return true if event has been processed by GUI
+		*/
+		bool injectKeyPress(KeyCode _key, Char _text = 0);
+		/** Inject KeyReleas event
+			@return true if event has been processed by GUI
+		*/
+		bool injectKeyRelease(KeyCode _key);
+
 		/** Destroy any created widget */
 		void destroyWidget(Widget* _widget);
 
@@ -132,8 +160,9 @@ namespace MyGUI
 			return findWidgetT(_prefix + _name, _throw);
 		}
 
+		// mirror WidgetManager
 		/** Find widget by name and cast it to T type.
-			If widget not found or T and found widget have different types exception will be thrown, or if the second parameter is false the nullptr pointer will be returned
+			If widget not found or T and found widget have different types cause exception, or if the second parameter is false the nullptr pointer will be returned
 		*/
 		template <typename T>
 		T* findWidget(const std::string& _name, bool _throw = true)
@@ -152,11 +181,27 @@ namespace MyGUI
 			return findWidget<T>(_prefix + _name, _throw);
 		}
 
+
+		/** Show or hide mouse pointer */
+		void setVisiblePointer(bool _visible);
+		/** Is mouse pointer visible */
+		bool isVisiblePointer();
+
+
+		// mirror ResourceManager
+		/** Load config with any info (file can have different data such other config files that will be loaded, skins, layers, pointers, etc) */
+		bool load(const std::string& _file);
+
+		void resizeWindow(const IntSize& _size);
+
 		/** Destroy child widget or throw exception if this child widget not found */
 		void destroyChildWidget(Widget* _widget) { _destroyChildWidget(_widget); }
 
 		/** Destroy all child widgets */
 		void destroyAllChildWidget() { _destroyAllChildWidget(); }
+
+		/** Get name of Gui ResourceGroup*/
+		//static const std::string& getResourceGroup();
 
 		/** Get root widgets Enumerator */
 		EnumeratorWidgetPtr getEnumerator() { return EnumeratorWidgetPtr(mWidgetChild); }
@@ -167,9 +212,6 @@ namespace MyGUI
 			This function is called every frame by renderer.
 		*/
 		void _injectFrameEntered(float _time);
-
-		/** Resize GUI area */
-		void _resizeWindow(const IntSize& _size);
 
 	/*event:*/
 		/** Multidelegate for GUI per frame call.\n
@@ -185,40 +227,13 @@ namespace MyGUI
 		void destroyWidgetsVector(VectorWidgetPtr& _widgets) { destroyWidgets(_widgets); }
 
 		MYGUI_OBSOLETE("use : void Gui::setVisiblePointer(bool _value)")
-		void hidePointer();
+		void hidePointer() { setVisiblePointer(false); }
 		MYGUI_OBSOLETE("use : void Gui::setVisiblePointer(bool _value)")
-		void showPointer();
+		void showPointer() { setVisiblePointer(true); }
 		MYGUI_OBSOLETE("use : bool Gui::isVisiblePointer()")
-		bool isShowPointer();
+		bool isShowPointer() { return isVisiblePointer(); }
 		MYGUI_OBSOLETE("called be renderer, do not call it manually")
 		void injectFrameEntered(float _time) { }
-
-		MYGUI_OBSOLETE("use : void Gui::getViewSize().width")
-		int getViewWidth();
-		MYGUI_OBSOLETE("use : void Gui::getViewSize().height")
-		int getViewHeight();
-
-		MYGUI_OBSOLETE("use : bool InputManager::injectMouseMove(int _absx, int _absy, int _absz)")
-		bool injectMouseMove(int _absx, int _absy, int _absz);
-		MYGUI_OBSOLETE("use : bool InputManager::injectMousePress(int _absx, int _absy, MouseButton _id)")
-		bool injectMousePress(int _absx, int _absy, MouseButton _id);
-		MYGUI_OBSOLETE("use : bool InputManager::injectMouseRelease(int _absx, int _absy, MouseButton _id)")
-		bool injectMouseRelease(int _absx, int _absy, MouseButton _id);
-		MYGUI_OBSOLETE("use : bool InputManager::injectKeyPress(KeyCode _key, Char _text = 0)")
-		bool injectKeyPress(KeyCode _key, Char _text = 0);
-		MYGUI_OBSOLETE("use : bool InputManager::injectKeyRelease(KeyCode _key)")
-		bool injectKeyRelease(KeyCode _key);
-
-		MYGUI_OBSOLETE("use : void PointerManager::setVisible(_value)")
-		void setVisiblePointer(bool _value);
-		MYGUI_OBSOLETE("use : bool PointerManager::isVisible()")
-		bool isVisiblePointer();
-
-		MYGUI_OBSOLETE("use : bool ResourceManager::load(const std::string& _file)")
-		bool load(const std::string& _file);
-
-		MYGUI_OBSOLETE("use : const IntSize& RenderManager::getViewSize() const")
-		const IntSize& getViewSize() const;
 
 #endif // MYGUI_DONT_USE_OBSOLETE
 
@@ -249,8 +264,8 @@ namespace MyGUI
 		IntSize mViewSize;
 
 		// синглтоны гуя
-		InputManager* mInputManager;
-		SubWidgetManager* mSubWidgetManager;
+		InputManager * mInputManager;
+		SubWidgetManager * mSubWidgetManager;
 		LayerManager* mLayerManager;
 		SkinManager* mSkinManager;
 		WidgetManager* mWidgetManager;
@@ -264,7 +279,6 @@ namespace MyGUI
 		LanguageManager* mLanguageManager;
 		ResourceManager* mResourceManager;
 		FactoryManager* mFactoryManager;
-		ToolTipManager* mToolTipManager;
 
 	};
 

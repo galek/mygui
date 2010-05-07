@@ -2,6 +2,7 @@
 	@file
 	@author		Alexander Ptakhin
 	@date		01/2009
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -177,9 +178,10 @@ namespace MyGUI
 
 	/*internal:*/
 		virtual void _initialise(WidgetStyle _style, const IntCoord& _coord, Align _align, ResourceSkin* _info, Widget* _parent, ICroppedRectangle * _croppedParent, IWidgetCreator * _creator, const std::string& _name);
-		virtual void _shutdown();
 
 	protected:
+		virtual ~Canvas();
+
 		/// Destroys texture
 		void _destroyTexture( bool _sendEvent );
 
@@ -229,7 +231,7 @@ namespace MyGUI
 		TextureResizeMode mTexResizeMode;
 
 		/// Saved pointer from last calling lock. \sa lock
-		uint8_t* mTexData;
+		uint8* mTexData;
 
 		/// true if we own the texture (can delete it or replace by another instance), otherwise false
 		bool mTexManaged;

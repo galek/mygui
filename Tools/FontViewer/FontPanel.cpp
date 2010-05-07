@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		08/2008
+	@module
 */
 #include "precompiled.h"
 #include "FontPanel.h"
@@ -103,7 +104,7 @@ namespace demo
 				manager.remove(mFontName);
 			}
 
-			MyGUI::ResourceManager::getInstance().loadFromXmlNode(root, "", MyGUI::Version());
+			MyGUI::ResourceManager::getInstance()._load(root, "", MyGUI::Version());
 			MyGUI::IResource* resource = manager.getByName(mFontName, false);
 			MYGUI_ASSERT(resource != nullptr, "Could not find font '" << mFontName << "'");
 			MyGUI::IFont* font = resource->castType<MyGUI::IFont>();

@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		07/2008
+	@module
 */
 #ifndef __ITEM_DATA_H__
 #define __ITEM_DATA_H__
@@ -57,8 +58,8 @@ namespace demo
 		}
 
 		size_t getCount() const { return count; }
-		demo::ResourceItemInfoPtr getInfo() const { return mResourceInfo; }
-		MyGUI::ResourceImageSetPtr getImage() const { return mResourceImage; }
+		demo::ResourceItemInfoPtr getInfo() { return mResourceInfo; }
+		MyGUI::ResourceImageSetPtr getImage() { return mResourceImage; }
 
 	private:
 		size_t count;

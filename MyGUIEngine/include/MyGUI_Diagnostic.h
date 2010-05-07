@@ -3,6 +3,7 @@
 	@author		Albert Semenov
 	@author		baho_is
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -74,7 +75,7 @@
 #if MYGUI_DEBUG_MODE == 1
 	#define MYGUI_REGISTER_VALUE(map, value) \
 	{ \
-		/*MYGUI_LOG(Info, "Register value : '" << #value << "' = " << (int)value);*/ \
+		MYGUI_LOG(Info, "Register value : '" << #value << "' = " << (int)value); \
 		map[#value] = value; \
 	}
 	#define MYGUI_DEBUG_ASSERT(exp, dest) MYGUI_ASSERT(exp, dest)
@@ -97,9 +98,9 @@
 #elif MYGUI_COMPILER == MYGUI_COMPILER_GNUC
 	#if MYGUI_PLATFORM == MYGUI_PLATFORM_LINUX && MYGUI_COMP_VER == 412
 		#define MYGUI_OBSOLETE_START(text)
-		#define MYGUI_OBSOLETE_END
+        #define MYGUI_OBSOLETE_END
 	#else
-		#define MYGUI_OBSOLETE_START(text)
+        #define MYGUI_OBSOLETE_START(text)
 		#define MYGUI_OBSOLETE_END __attribute__((deprecated))
 	#endif
 

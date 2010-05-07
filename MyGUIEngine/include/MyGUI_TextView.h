@@ -2,13 +2,13 @@
 	@file
 	@author		Albert Semenov
 	@date		09/2009
+	@module
 */
 #ifndef __MYGUI_TEXT_VIEW_H__
 #define __MYGUI_TEXT_VIEW_H__
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_TextureUtility.h"
-#include "MyGUI_ColourARGB.h"
 
 namespace MyGUI
 {
@@ -18,20 +18,16 @@ namespace MyGUI
 	public:
 		CharInfo() : width(0) { }
 		CharInfo(const FloatRect& _rect, int _width) : rect(_rect), width(_width) { }
-		CharInfo(ColourARGB _colour) : rect(-1, 0, 0, 0), colour(_colour) { }
+		CharInfo(uint32 _colour) : rect(-1, 0, 0, 0), width((int)_colour) { }
 
 		bool isColour() const { return rect.left == -1; }
 		int getWidth() const { return width; }
 		const FloatRect& getUVRect() const { return rect; }
-		ColourARGB getColour() const { return colour; }
+		uint32 getColour() const { return (uint32)width; }
 
 	private:
 		FloatRect rect;
-		union
-		{
-			int width;
-			ColourARGB colour;
-		};
+		int width;
 	};
 
 	typedef std::vector<CharInfo> VectorCharInfo;
@@ -77,7 +73,7 @@ namespace MyGUI
 		int getLenght() const { MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid"); return lenght; }
 		size_t getCount() const { MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid"); return count; }
 		size_t getPosition() const { MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid"); return position; }
-		UString::const_iterator getTextIter() const { MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid"); return space_point; }
+		UString::const_iterator getTextIter() { MYGUI_DEBUG_ASSERT(rollback, "rollback point not valid"); return space_point; }
 
 	private:
 		size_t position;
@@ -173,20 +169,19 @@ namespace MyGUI
 					if (character != L'#')
 					{
 						// парсим первый символ
-						int colour_value = convert_colour[(character-48) & 0x3F];
+						uint32 colour = convert_colour[(character-48) & 0x3F];
 
 						// и еще пять символов после шарпа
 						for (char i=0; i<5; i++)
 						{
 							++ index;
 							if (index == end) { --index; continue; } // это защита
-							colour_value <<= 4;
-							colour_value += convert_colour[ ((*index) - 48) & 0x3F ];
+							colour <<= 4;
+							colour += convert_colour[ ((*index) - 48) & 0x3F ];
 						}
 
-						ColourARGB colour;
-						colour.value = colour_value;
-						colour.convertFormat(_format);
+						// если нужно, то меняем красный и синий компоненты
+						texture_utility::convertColour(colour, _format);
 
 						line_info.simbols.push_back( CharInfo(colour) );
 
@@ -348,7 +343,7 @@ namespace MyGUI
 
 		const IntSize& getViewSize() const { return mViewSize; }
 		size_t getTextLength() const { return mLength; }
-		const VectorLineInfo& getData() const { return mLineInfo; }
+		const VectorLineInfo& getData() { return mLineInfo; }
 
 	private:
 		IntSize mViewSize;

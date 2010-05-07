@@ -2,6 +2,7 @@
 	@file
 	@author		Georgiy Evmenov
 	@date		09/2008
+	@module
 */
 
 #include "precompiled.h"

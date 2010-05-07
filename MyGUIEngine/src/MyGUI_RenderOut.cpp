@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		11/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -29,7 +30,6 @@
 #include "MyGUI_LayerManager.h"
 #include "MyGUI_SkinManager.h"
 #include "MyGUI_StaticText.h"
-#include "MyGUI_RenderManager.h"
 
 namespace MyGUI
 {
@@ -71,7 +71,7 @@ namespace MyGUI
 				Gui * gui = Gui::getInstancePtr();
 				if (gui == nullptr) return;
 
-				const IntSize& size = RenderManager::getInstance().getViewSize();
+				const IntSize& size = gui->getViewSize();
 
 				if (!LayerManager::getInstance().isExist(layer)) return;
 				if (!SkinManager::getInstance().isExist(skin)) return;
@@ -120,7 +120,7 @@ namespace MyGUI
 
 			for (DequeInfo::iterator iter=lines.begin(); iter != lines.end(); ++iter)
 			{
-				str_out += utility::toString("[ ", iter->num, (iter->count > 1) ? (" , " + utility::toString(iter->count)) : "", " ]  ", iter->line, "\n");
+				str_out += utility::toString("[ ", (unsigned int)iter->num, (iter->count > 1) ? (" , " + utility::toString((unsigned int)iter->count)) : "", " ]  ", iter->line, "\n");
 			}
 
 			// непосредственный вывод

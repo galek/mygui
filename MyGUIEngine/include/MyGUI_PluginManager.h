@@ -2,6 +2,7 @@
 	@file
 	@author		Denis Koronchik
 	@date		09/2007
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -23,7 +24,7 @@
 #define __MYGUI_PLUGIN_MANAGER_H__
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_Singleton.h"
+#include "MyGUI_Instance.h"
 #include "MyGUI_Plugin.h"
 #include "MyGUI_XmlDocument.h"
 #include "MyGUI_Version.h"
@@ -34,8 +35,10 @@ namespace MyGUI
 
 	/*!	\brief Plugin manager. Load/unload and register plugins.
 	*/
-	class MYGUI_EXPORT PluginManager : public MyGUI::Singleton<PluginManager>
+	class MYGUI_EXPORT PluginManager
 	{
+		MYGUI_INSTANCE_HEADER( PluginManager )
+
 	public:
 		typedef void (*DLL_START_PLUGIN)(void);
 		typedef void (*DLL_STOP_PLUGIN)(void);
@@ -51,6 +54,10 @@ namespace MyGUI
 		//!	Unload plugin
 		void unloadPlugin(const std::string& _file);
 
+		/** Load additional MyGUI *_plugin.xml file */
+		bool load(const std::string& _file);
+		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
+
 		/*!	Install plugin
 			@remarks Calls from plugin
 		*/
@@ -63,17 +70,6 @@ namespace MyGUI
 
 		//!	Unload all plugins
 		void unloadAllPlugins();
-
-	/*obsolete:*/
-#ifndef MYGUI_DONT_USE_OBSOLETE
-
-		MYGUI_OBSOLETE("use : bool ResourceManager::load(const std::string& _file)")
-		bool load(const std::string& _file);
-
-#endif // MYGUI_DONT_USE_OBSOLETE
-
-	private:
-		void _load(xml::ElementPtr _node, const std::string& _file, Version _version);
 
 	private:
 		//!	List of dynamic libraries

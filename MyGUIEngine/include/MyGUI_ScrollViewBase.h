@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		10/2008
+	@module
 */
 /*
 	This file is part of MyGUI.
@@ -28,7 +29,7 @@
 namespace MyGUI
 {
 
-	class MYGUI_EXPORT ScrollViewBase
+	class ScrollViewBase
 	{
 
 	protected:

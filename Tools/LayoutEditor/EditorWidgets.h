@@ -4,20 +4,24 @@
 #include <sstream>
 #include "WidgetContainer.h"
 
-void MapSet(VectorStringPairs & _map, const std::string &_key, const std::string &_value);
-VectorStringPairs::iterator MapFind(VectorStringPairs & _map, const std::string &_key);
-void MapErase(VectorStringPairs & _map, const std::string &_key);
+void MapSet(StringPairs & _map, const std::string &_key, const std::string &_value);
+StringPairs::iterator MapFind(StringPairs & _map, const std::string &_key);
+void MapErase(StringPairs & _map, const std::string &_key);
 
 // это можно в методы гуи занести
 MyGUI::IntCoord convertCoordToParentCoord(const MyGUI::IntCoord& _coord, MyGUI::Widget* _widget);
 
-class CodeGenerator;
-
-class EditorWidgets : public MyGUI::Singleton<EditorWidgets>
+class EditorWidgets
 {
-public:
-	EditorWidgets();
-	~EditorWidgets();
+	//MYGUI_INSTANCE_HEADER(EditorWidgets);
+	private:
+		static EditorWidgets* msInstance;
+		bool mIsInitialise;
+	public:
+		EditorWidgets();
+		~EditorWidgets();
+		static EditorWidgets& getInstance();
+		static EditorWidgets* getInstancePtr();
 
 public:
 	void initialise();
@@ -33,8 +37,6 @@ public:
 	void remove(WidgetContainer * _container);
 	void clear();
 
-	void setCodeGenerator(CodeGenerator* _codeGenerator) { mCodeGenerator = _codeGenerator; }
-
 	bool tryToApplyProperty(MyGUI::Widget* _widget, const std::string& _key, const std::string& _value, bool _test = false);
 
 	std::vector<WidgetContainer*> widgets;
@@ -49,8 +51,6 @@ private:
 	void loadIgnoreParameters(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
 
 	std::vector<std::string> ignore_parameters;
-
-	CodeGenerator* mCodeGenerator;
 };
 
 #endif // __EDITOR_WIDGETS_H__

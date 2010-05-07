@@ -2,6 +2,7 @@
 	@file
 	@author		Albert Semenov
 	@date		12/2009
+	@module
 */
 #include "DemoKeeper.h"
 #include "Base/Main.h"
@@ -24,8 +25,8 @@ namespace demo
 	{
 		MyGUI::FactoryManager::getInstance().registerFactory<MyGUI::RTTLayer>("Layer");
 
-		MyGUI::ResourceManager::getInstance().load("Layers.xml");
-		MyGUI::ResourceManager::getInstance().load("Layers.layout");
+		getGUI()->load("Layers.xml");
+		getGUI()->load("Layers.layout");
 	}
 
 	void DemoKeeper::destroyScene()

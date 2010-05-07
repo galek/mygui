@@ -84,7 +84,7 @@ namespace diagnostic
 				if (text)
 				{
 					const MyGUI::IntSize& size = text->getTextSize() + mInfo->getSize() - text->getSize();
-					const MyGUI::IntSize& size_view = MyGUI::RenderManager::getInstance().getViewSize();
+					const MyGUI::IntSize& size_view = MyGUI::Gui::getInstance().getViewSize();
 					mInfo->setCoord(size_view.width - size.width - 20, size_view.height - size.height - 20, size.width, size.height);
 				}
 			}
@@ -109,15 +109,7 @@ namespace diagnostic
 
 		void setVisible(bool _value)
 		{
-			if (mInfo)
-				mInfo->setVisible(_value);
-		}
-
-		bool getVisible()
-		{
-			if (mInfo)
-				return mInfo->isVisible();
-			return false;
+			mInfo->setVisible(_value);
 		}
 
 	private:
